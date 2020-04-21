@@ -92,11 +92,11 @@ class Network:
         ### Note: You may need to update the function parameters. ###
         return
 
-    def wait(self):
+    def wait(self, request_id):
         ### TODO: Wait for the request to be complete. ###
         ### TODO: Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
-        status = self.exec_network.requests[0].wait(-1)
+        status = self.exec_network.requests[request_id].wait(-1)
         return status
 
     def get_output(self):
