@@ -33,6 +33,10 @@ import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 from inference import Network
 
+CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
+MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
+VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
+
 # MQTT server environment variables
 HOSTNAME = socket.gethostname()
 IPADDRESS = socket.gethostbyname(HOSTNAME)
