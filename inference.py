@@ -43,13 +43,44 @@ class Network:
         self.exec_network = None
         self.infer_request = None
 
-    def load_model(self):
-        ### TODO: Load the model ###
-        ### TODO: Check for supported layers ###
-        ### TODO: Add any necessary extensions ###
-        ### TODO: Return the loaded inference plugin ###
+    def load_model(self, model, device="CPU", cpu_extension=None):
         ### Note: You may need to update the function parameters. ###
-        return
+        # Load the model
+        model_xml = model
+        model_bin = os.path.splitext(model_xml)[0] + ".bin"
+
+        # Initialize the plugin
+        self.plugin = IECore()
+
+        # Add a CPU extension, if applicable
+        if cpu_extension and "CPU" in device:
+            self.plugin.add_extension(cpu_extension, device)
+
+        # Read the IR as a IENetwork
+        self.network = IENetwork(model=model_xml, weights=model_bin)
+
+        # Check for supported layers
+        network_supported_layers = self.plugin.query_network(
+            network=self.network, device_name="CPU")
+
+        not_supported_layers = []
+        for layer in self.network.layers.keys():
+            if layer not in network_supported_layers:
+                not_supported_layers.append(layer)
+        if len(not_supported_layers) > 0:
+            log.debug("Not supported layers in model: ".format(
+                not_supported_layers))
+            exit(1)
+
+        # Load the IENetwork into the plugin
+        self.exec_network = self.plugin.load_network(self.network, device)
+
+        # Get the input layer
+        self.input_blob = next(iter(self.network.inputs))
+        self.output_blob = next(iter(self.network.outputs))
+
+        # Return the loaded inference plugin
+        return self.plugin
 
     def get_input_shape(self):
         ### TODO: Return the shape of the input layer ###
@@ -69,6 +100,6 @@ class Network:
         return status
 
     def get_output(self):
-        ### TODO: Extract and return the output results
+        # TODO: Extract and return the output results
         ### Note: You may need to update the function parameters. ###
         return
