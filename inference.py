@@ -41,7 +41,7 @@ class Network:
         self.input_blob = None
         self.output_blob = None
         self.exec_network = None
-        self.infer_request = None
+        self.input_image_shape = None
 
     def load_model(self, model, device="CPU", cpu_extension=None):
         ### Note: You may need to update the function parameters. ###
@@ -86,10 +86,14 @@ class Network:
         ### TODO: Return the shape of the input layer ###
         return self.network.inputs[self.input_blob].shape
 
-    def exec_net(self):
+    def exec_net(self, request_id, frame):
         ### TODO: Start an asynchronous request ###
         ### TODO: Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
+        self.input_image_shape = frame.shape
+        self.exec_network.start_async(
+            request_id=request_id,
+            inputs={self.input_blob: frame})
         return
 
     def wait(self, request_id):
