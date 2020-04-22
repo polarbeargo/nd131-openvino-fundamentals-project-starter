@@ -26,13 +26,10 @@ import time
 import socket
 import json
 import cv2
-
 import logging as log
 import paho.mqtt.client as mqtt
-
 from argparse import ArgumentParser
 from inference import Network
-
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
@@ -94,33 +91,35 @@ def infer_on_stream(args, client):
     prob_threshold = args.prob_threshold
 
     # Load the model through `infer_network`
-    infer_network.load_model(model, args.d, CPU_EXTENSION)
+    infer_network.load_model(model=args.model,
+                             device=args.device,
+                             cpu_extension=args.cpu_extension)
     net_input_shape = infer_network.get_input_shape()
 
     ### TODO: Handle the input stream ###
 
     ### TODO: Loop until stream is over ###
 
-        ### TODO: Read from the video capture ###
+    ### TODO: Read from the video capture ###
 
-        ### TODO: Pre-process the image as needed ###
+    ### TODO: Pre-process the image as needed ###
 
-        ### TODO: Start asynchronous inference for specified request ###
+    ### TODO: Start asynchronous inference for specified request ###
 
-        ### TODO: Wait for the result ###
+    ### TODO: Wait for the result ###
 
-            ### TODO: Get the results of the inference request ###
+    ### TODO: Get the results of the inference request ###
 
-            ### TODO: Extract any desired stats from the results ###
+    ### TODO: Extract any desired stats from the results ###
 
-            ### TODO: Calculate and send relevant information on ###
-            ### current_count, total_count and duration to the MQTT server ###
-            ### Topic "person": keys of "count" and "total" ###
-            ### Topic "person/duration": key of "duration" ###
+    ### TODO: Calculate and send relevant information on ###
+    ### current_count, total_count and duration to the MQTT server ###
+    ### Topic "person": keys of "count" and "total" ###
+    ### Topic "person/duration": key of "duration" ###
 
-        ### TODO: Send the frame to the FFMPEG server ###
+    ### TODO: Send the frame to the FFMPEG server ###
 
-        ### TODO: Write an output image if `single_image_mode` ###
+    ### TODO: Write an output image if `single_image_mode` ###
 
 
 def main():
