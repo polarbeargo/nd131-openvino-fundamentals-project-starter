@@ -105,12 +105,11 @@ def infer_on_stream(args, client):
         log.error("Unable open video stream")
     ### TODO: Loop until stream is over ###
     while cap.isOpened():
-    ### TODO: Read from the video capture ###
-    flag, frame = cap.read()
+        ### TODO: Read from the video capture ###
+        flag, frame = cap.read()
         if not flag:
             break
     ### TODO: Pre-process the image as needed ###
-
     ### TODO: Start asynchronous inference for specified request ###
 
     ### TODO: Wait for the result ###
