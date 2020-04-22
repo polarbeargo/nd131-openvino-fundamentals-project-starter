@@ -93,7 +93,9 @@ def infer_on_stream(args, client):
     # Set Probability threshold for detections
     prob_threshold = args.prob_threshold
 
-    ### TODO: Load the model through `infer_network` ###
+    # Load the model through `infer_network`
+    infer_network.load_model(model, args.d, CPU_EXTENSION)
+    net_input_shape = infer_network.get_input_shape()
 
     ### TODO: Handle the input stream ###
 
