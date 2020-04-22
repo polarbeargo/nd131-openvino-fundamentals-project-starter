@@ -104,9 +104,11 @@ def infer_on_stream(args, client):
     if not cap.isOpened():
         log.error("Unable open video stream")
     ### TODO: Loop until stream is over ###
-    
+    while cap.isOpened():
     ### TODO: Read from the video capture ###
-
+    flag, frame = cap.read()
+        if not flag:
+            break
     ### TODO: Pre-process the image as needed ###
 
     ### TODO: Start asynchronous inference for specified request ###
@@ -116,7 +118,6 @@ def infer_on_stream(args, client):
     ### TODO: Get the results of the inference request ###
 
     ### TODO: Extract any desired stats from the results ###
-
     ### TODO: Calculate and send relevant information on ###
     ### current_count, total_count and duration to the MQTT server ###
     ### Topic "person": keys of "count" and "total" ###
