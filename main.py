@@ -110,6 +110,11 @@ def infer_on_stream(args, client):
         if not flag:
             break
     ### TODO: Pre-process the image as needed ###
+    logger.debug("size: ".format(net_input_shape))
+    p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
+    p_frame = p_frame.transpose((2, 0, 1))
+    p_frame = p_frame.reshape(
+        net_input_shape)
     ### TODO: Start asynchronous inference for specified request ###
 
     ### TODO: Wait for the result ###
