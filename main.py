@@ -87,6 +87,7 @@ def infer_on_stream(args, client):
     """
     # Initialise the class
     infer_network = Network()
+
     # Set Probability threshold for detections
     prob_threshold = args.prob_threshold
 
@@ -97,9 +98,13 @@ def infer_on_stream(args, client):
     net_input_shape = infer_network.get_input_shape()
 
     ### TODO: Handle the input stream ###
-
+    input_stream = args.input
+    cap = cv2.VideoCapture(input_stream)
+    cap.open(input_stream)
+    if not cap.isOpened():
+        log.error("Unable open video stream")
     ### TODO: Loop until stream is over ###
-
+    
     ### TODO: Read from the video capture ###
 
     ### TODO: Pre-process the image as needed ###
