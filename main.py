@@ -97,19 +97,19 @@ def infer_on_stream(args, client):
                              cpu_extension=args.cpu_extension)
     net_input_shape = infer_network.get_input_shape()
 
-    ### TODO: Handle the input stream ###
+    # Handle the input stream ###
     input_stream = args.input
     cap = cv2.VideoCapture(input_stream)
     cap.open(input_stream)
     if not cap.isOpened():
         log.error("Unable open video stream")
-    ### TODO: Loop until stream is over ###
+    # Loop until stream is over ###
     while cap.isOpened():
         ### TODO: Read from the video capture ###
         flag, frame = cap.read()
         if not flag:
             break
-    ### TODO: Pre-process the image as needed ###
+    # Pre-process the image as needed ###
     logger.debug("size: ".format(net_input_shape))
     p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
     p_frame = p_frame.transpose((2, 0, 1))
