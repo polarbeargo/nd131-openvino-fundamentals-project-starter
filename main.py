@@ -119,7 +119,8 @@ def infer_on_stream(args, client):
         infer_network.exec_net(request_id, p_frame)
         # Wait for the result ###
         if plugin.wait() == 0:
-    ### TODO: Get the results of the inference request ###
+            # Get the results of the inference request ###
+            result = infer_network.exec_net(request_id, frame.shape,prob_threshold)
 
     ### TODO: Extract any desired stats from the results ###
     ### TODO: Calculate and send relevant information on ###
