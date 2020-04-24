@@ -117,8 +117,8 @@ def infer_on_stream(args, client):
         p_frame = p_frame.reshape(net_input_shape)
         # Start asynchronous inference for specified request ###
         infer_network.exec_net(request_id, p_frame)
-    ### TODO: Wait for the result ###
-
+        # Wait for the result ###
+        if plugin.wait() == 0:
     ### TODO: Get the results of the inference request ###
 
     ### TODO: Extract any desired stats from the results ###
