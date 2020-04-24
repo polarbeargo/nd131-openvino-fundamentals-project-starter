@@ -132,6 +132,12 @@ def infer_on_stream(args, client):
 
     ### TODO: Write an output image if `single_image_mode` ###
 
+def count_targets(detections, image):
+    num_detections = 0
+    draw_bounding_box = image
+    if len(detections) > 0:
+        draw_bounding_box, num_detections = draw_boxes(detections, image)
+    return num_detections, draw_bounding_box
 
 def main():
     """
