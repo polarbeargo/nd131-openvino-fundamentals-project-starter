@@ -139,6 +139,16 @@ def count_targets(detections, image):
         draw_bounding_box, num_detections = draw_boxes(detections, image)
     return num_detections, draw_bounding_box
 
+def draw_boxes(boxes, image):
+    num_detections = 0
+    for box in boxes:
+        logger.debug("box: {}".format(box))
+        if box['class_id'] == 0:
+            if box['confidence'] > 0:
+                cv2.rectangle(image,(box['xmin'], box['ymin']), (box['xmax'], box['ymax']), (0,255,0), 1)
+                num_detections +=1
+    return image, num_detections
+
 def main():
     """
     Load the network and parse the output.
