@@ -122,7 +122,9 @@ def infer_on_stream(args, client):
             # Get the results of the inference request ###
             result = infer_network.exec_net(request_id, frame.shape,prob_threshold)
 
-    ### TODO: Extract any desired stats from the results ###
+            # Extract any desired stats from the results ###
+            count, box_frame = count_targets(result,frame)
+            
     ### TODO: Calculate and send relevant information on ###
     ### current_count, total_count and duration to the MQTT server ###
     ### Topic "person": keys of "count" and "total" ###
