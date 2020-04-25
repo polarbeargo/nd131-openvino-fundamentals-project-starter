@@ -124,14 +124,16 @@ def infer_on_stream(args, client):
 
             # Extract any desired stats from the results ###
             count, box_frame = count_targets(result,frame)
-            
+
     ### TODO: Calculate and send relevant information on ###
     ### current_count, total_count and duration to the MQTT server ###
     ### Topic "person": keys of "count" and "total" ###
     ### Topic "person/duration": key of "duration" ###
 
-    ### TODO: Send the frame to the FFMPEG server ###
-
+    # Send the frame to the FFMPEG server ###
+    logger.debug("Image_size: {}".format(box_frame.shape))
+    sys.stdout.buffer.write(box_frame)
+    sys.stdout.flush()
     # Write an output image if `single_image_mode`
     if single_image_mode:
             cv2.imwrite("output.jpg",)
