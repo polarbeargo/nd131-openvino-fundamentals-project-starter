@@ -130,7 +130,20 @@ def infer_on_stream(args, client):
 
     ### TODO: Send the frame to the FFMPEG server ###
 
-    ### TODO: Write an output image if `single_image_mode` ###
+    # Write an output image if `single_image_mode`
+    if single_image_mode:
+            cv2.imwrite("output.jpg",)
+
+    write_csv(data_list)
+    capture.release()
+    cv2.destroyAllWindows()
+    client.disconnect()
+
+def write_csv(data):
+    with open('./log.csv','w') as outfile:
+        writer = DictWriter(outfile,())
+        writer.writeheader()
+        writer.writerows(data)
 
 def count_targets(detections, image):
     num_detections = 0
