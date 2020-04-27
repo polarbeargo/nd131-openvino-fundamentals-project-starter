@@ -129,12 +129,19 @@ def infer_on_stream(args, client):
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
             ### Topic "person/duration": key of "duration" ###
+        key_pressed = cv2.waitKey(60)
+        if key_pressed == 27:
+            write_csv(data_list)
+            cap.release()
+            cv2.destroyAllWindows()
+            client.disconnect()
+            break
 
     # Send the frame to the FFMPEG server ###
     logger.debug("Image_size: {}".format(box_frame.shape))
     sys.stdout.buffer.write(box_frame)
     sys.stdout.flush()
-
+    
     # Write an output image if `single_image_mode`
     if single_image_mode:
             cv2.imwrite("output.jpg",)
