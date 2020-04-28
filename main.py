@@ -98,7 +98,17 @@ def infer_on_stream(args, client):
     net_input_shape = infer_network.get_input_shape()
 
     # Handle the input stream ###
-    input_stream = args.input
+    if args.input =='CAM':
+        input_stream = 0
+        single_image_mode = False
+    elif args.input[-4:] in [".jpg", ".bmp", ".png"]:
+        single_image_mode = True
+        input_stream = args.input
+    else:
+        single_image_mode=False
+        input_stream = args.input
+        assert os.path.isfile(input_stream)
+
     cap = cv2.VideoCapture(input_stream)
     cap.open(input_stream)
     if not cap.isOpened():
