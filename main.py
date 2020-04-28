@@ -137,19 +137,19 @@ def infer_on_stream(args, client):
             client.disconnect()
             break
 
-    # Send the frame to the FFMPEG server ###
-    logger.debug("Image_size: {}".format(box_frame.shape))
-    sys.stdout.buffer.write(box_frame)
-    sys.stdout.flush()
+        # Send the frame to the FFMPEG server ###
+        logger.debug("Image_size: {}".format(box_frame.shape))
+        sys.stdout.buffer.write(box_frame)
+        sys.stdout.flush()
     
-    # Write an output image if `single_image_mode`
-    if single_image_mode:
+        # Write an output image if `single_image_mode`
+        if single_image_mode:
             cv2.imwrite("output.jpg",)
 
-    write_csv(data_list)
-    capture.release()
-    cv2.destroyAllWindows()
-    client.disconnect()
+        write_csv(data_list)
+        cap.release()
+        cv2.destroyAllWindows()
+        client.disconnect()
 
 def write_csv(data):
     with open('./log.csv','w') as outfile:
