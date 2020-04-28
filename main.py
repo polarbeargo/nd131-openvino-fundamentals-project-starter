@@ -113,6 +113,8 @@ def infer_on_stream(args, client):
     cap.open(input_stream)
     if not cap.isOpened():
         log.error("Unable open video stream")
+    logger.debug( "Weight-Height: " + str(capture.get(cv2.CAP_PROP_FRAME_WIDTH)) + "-" + str(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    
     # Loop until stream is over ###
     while cap.isOpened():
         ### TODO: Read from the video capture ###
