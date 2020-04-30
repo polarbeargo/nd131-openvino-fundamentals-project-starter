@@ -120,6 +120,7 @@ def infer_on_stream(args, client):
     current_count = 0
     request_id = 0
     num_detected = 0
+    inference_t = 0
 
     # Loop until stream is over ###
     while cap.isOpened():
@@ -135,15 +136,18 @@ def infer_on_stream(args, client):
         p_frame = p_frame.reshape(net_input_shape)
 
         # Start asynchronous inference for specified request ###
+        t0 = time.time()
         infer_network.exec_net(request_id, p_frame)
 
         # Wait for the result ###
         if plugin.wait() == 0:
 
             # Get the results of the inference request ###
-            result = infer_network.exec_net(
+            result = infer_network.get_output(
                 request_id, frame.shape, prob_threshold)
-
+            t1 = time.time()
+            inference_t = t1 - t0
+            
             # Extract any desired stats from the results ###
             count, box_frame = count_targets(result, frame)
 
