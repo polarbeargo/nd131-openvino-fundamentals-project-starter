@@ -106,4 +106,4 @@ class Network:
     def get_output(self):
         # TODO: Extract and return the output results
         ### Note: You may need to update the function parameters. ###
-        return
+        return self.exec_network.requests[request_id].outputs[self.output_blob]
