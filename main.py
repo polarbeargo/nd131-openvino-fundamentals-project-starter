@@ -121,7 +121,9 @@ def infer_on_stream(args, client):
     request_id = 0
     num_detected = 0
     inference_t = 0
-
+    max_len = 50
+    track = deque(maxlen=max_len)
+    
     # Loop until stream is over ###
     while cap.isOpened():
         ### TODO: Read from the video capture ###
@@ -147,7 +149,7 @@ def infer_on_stream(args, client):
                 request_id, frame.shape, prob_threshold)
             t1 = time.time()
             inference_t = t1 - t0
-            
+
             # Extract any desired stats from the results ###
             count, box_frame = count_targets(result, frame)
 
@@ -155,6 +157,9 @@ def infer_on_stream(args, client):
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
             ### Topic "person/duration": key of "duration" ###
+            track.append(count)
+            num_detected = 0
+            
             if total_count > 0:
                 duration = time/total_count
                 client.publish("person/duration",
