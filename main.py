@@ -30,6 +30,9 @@ import logging as log
 import paho.mqtt.client as mqtt
 from argparse import ArgumentParser
 from inference import Network
+from csv import DictWriter
+from collections import deque
+
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
@@ -86,16 +89,16 @@ def infer_on_stream(args, client):
     :return: None
     """
     # Initialise the class
-    infer_network = Network()
+    plugin = Network()
 
     # Set Probability threshold for detections
     prob_threshold = args.prob_threshold
 
     # Load the model through `infer_network`
-    infer_network.load_model(model=args.model,
+    plugin.load_model(model=args.model,
                              device=args.device,
                              cpu_extension=args.cpu_extension)
-    net_input_shape = infer_network.get_input_shape()
+    net_input_shape = plugin.get_input_shape()
 
     # Handle the input stream ###
     if args.input == 'CAM':
@@ -122,6 +125,8 @@ def infer_on_stream(args, client):
     num_detected = 0
     inference_t = 0
     max_len = 50
+    prev_count = 0
+    duration = 0
     track = deque(maxlen=max_len)
     
     # Loop until stream is over ###
@@ -139,13 +144,13 @@ def infer_on_stream(args, client):
 
         # Start asynchronous inference for specified request ###
         t0 = time.time()
-        infer_network.exec_net(request_id, p_frame)
+        plugin.exec_net(request_id, p_frame)
 
         # Wait for the result ###
-        if plugin.wait() == 0:
+        if plugin.wait(request_id) == 0:
 
             # Get the results of the inference request ###
-            result = infer_network.get_output(
+            result = plugin.get_output(
                 request_id, frame.shape, prob_threshold)
             t1 = time.time()
             inference_t = t1 - t0
@@ -156,14 +161,20 @@ def infer_on_stream(args, client):
             ### TODO: Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            ### Topic "person/duration": key of "duration" ###
+            
             track.append(count)
             num_detected = 0
-            
+            ### Topic "person/duration": key of "duration" ###
+            if num_detected < prev_count:
+                prev_count = num_detected
+                
+            if num_detected > 0:
+                duration += (time.time() - start_time)/10
+                logger.debug("Duration: {}".format(duration))
             if total_count > 0:
-                duration = time/total_count
+                avg_duration = time/total_count
                 client.publish("person/duration",
-                               json.dumps({"duration": int(duration)}))
+                               json.dumps({"duration": int(avg_duration)}))
 
             client.publish("person", json.dumps(
                 {"count": num_detected}), retain=True)
