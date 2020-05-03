@@ -28,6 +28,7 @@ import json
 import cv2
 import logging as log
 import paho.mqtt.client as mqtt
+import numpy as np
 from argparse import ArgumentParser
 from inference import Network
 from csv import DictWriter
@@ -127,6 +128,7 @@ def infer_on_stream(args, client):
     max_len = 50
     prev_count = 0
     duration = 0
+    threshold = 0.1
     track = deque(maxlen=max_len)
     
     # Loop until stream is over ###
@@ -164,6 +166,17 @@ def infer_on_stream(args, client):
             
             track.append(count)
             num_detected = 0
+
+            if np.sum(track)/max_len > threshold:
+                num_detected = 1
+            
+            if num_detected > prev_count:
+                start_time = time.time()
+                num_persons_in = num_detected - prev_count
+                total_count += num_persons_in
+                prev_count = num_detected
+                client.publish("person", json.dumps({"total":total_count}), retain=True)
+
             ### Topic "person/duration": key of "duration" ###
             if num_detected < prev_count:
                 prev_count = num_detected
