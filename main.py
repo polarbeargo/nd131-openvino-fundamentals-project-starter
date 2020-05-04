@@ -33,7 +33,6 @@ from argparse import ArgumentParser
 from inference import Network
 from csv import DictWriter
 from collections import deque
-
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
@@ -97,8 +96,8 @@ def infer_on_stream(args, client):
 
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
-                             device=args.device,
-                             cpu_extension=args.cpu_extension)
+                      device=args.device,
+                      cpu_extension=args.cpu_extension)
     net_input_shape = plugin.get_input_shape()
 
     # Handle the input stream ###
@@ -130,9 +129,10 @@ def infer_on_stream(args, client):
     duration = 0
     threshold = 0.1
     track = deque(maxlen=max_len)
-    
+
     # Loop until stream is over ###
     while cap.isOpened():
+        log_data = {}
         ### TODO: Read from the video capture ###
         flag, frame = cap.read()
         if not flag:
@@ -159,28 +159,30 @@ def infer_on_stream(args, client):
 
             # Extract any desired stats from the results ###
             count, box_frame = count_targets(result, frame)
-
+            process_t = time.time() - t1
+            
             ### TODO: Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            
+
             track.append(count)
             num_detected = 0
 
             if np.sum(track)/max_len > threshold:
                 num_detected = 1
-            
+
             if num_detected > prev_count:
                 start_time = time.time()
                 num_persons = num_detected - prev_count
                 total_count += num_persons
                 prev_count = num_detected
-                client.publish("person", json.dumps({"total":total_count}), retain=True)
+                client.publish("person", json.dumps(
+                    {"total": total_count}), retain=True)
 
             ### Topic "person/duration": key of "duration" ###
             if num_detected < prev_count:
                 prev_count = num_detected
-                
+
             if num_detected > 0:
                 duration += (time.time() - start_time)/10
                 logger.debug("Duration: {}".format(duration))
@@ -191,6 +193,19 @@ def infer_on_stream(args, client):
 
             client.publish("person", json.dumps(
                 {"count": num_detected}), retain=True)
+
+        log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
+        log_data['count'] = count
+        log_data['num_detected'] = num_detected
+        log_data['num_persons'] = num_persons
+        log_data['prev_count'] = prev_count
+        log_data['total_count'] = total_count
+        log_data['duration'] = duration
+        log_data['avg_duration'] = avg_duration
+        log_data['inference_t'] = inference_t
+        log_data['process_t'] = process_t
+        log_data['result'] = result
+        data_list.append(log_data)
 
         key_pressed = cv2.waitKey(60)
         if key_pressed == 27:
@@ -217,7 +232,11 @@ def infer_on_stream(args, client):
 
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
-        writer = DictWriter(outfile, ())
+        writer = DictWriter(outfile, ('time','count','num_detected',
+                'num_persons','prev_count',
+                'total_count','duration',
+                'avg_duration','inference_t',
+                'process_t','result'))
         writer.writeheader()
         writer.writerows(data)
 
