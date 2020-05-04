@@ -172,8 +172,8 @@ def infer_on_stream(args, client):
             
             if num_detected > prev_count:
                 start_time = time.time()
-                num_persons_in = num_detected - prev_count
-                total_count += num_persons_in
+                num_persons = num_detected - prev_count
+                total_count += num_persons
                 prev_count = num_detected
                 client.publish("person", json.dumps({"total":total_count}), retain=True)
 
