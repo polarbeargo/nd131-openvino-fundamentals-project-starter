@@ -37,6 +37,10 @@ CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
 
+CLASSES = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole',
+           'traffic_light', 'traffic_sign', 'vegetation', 'terrain', 'sky', 'person',
+           'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ego-vehicle']
+
 # MQTT server environment variables
 HOSTNAME = socket.gethostname()
 IPADDRESS = socket.gethostbyname(HOSTNAME)
@@ -153,14 +157,14 @@ def infer_on_stream(args, client):
 
             # Get the results of the inference request ###
             result = plugin.get_output(
-                request_id, frame.shape, prob_threshold)
+                request_id)
             t1 = time.time()
             inference_t = t1 - t0
 
             # Extract any desired stats from the results ###
             count, box_frame = count_targets(result, frame)
             process_t = time.time() - t1
-            
+
             ### TODO: Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
@@ -232,11 +236,11 @@ def infer_on_stream(args, client):
 
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
-        writer = DictWriter(outfile, ('time','count','num_detected',
-                'num_persons','prev_count',
-                'total_count','duration',
-                'avg_duration','inference_t',
-                'process_t','result'))
+        writer = DictWriter(outfile, ('time', 'count', 'num_detected',
+                                      'num_persons', 'prev_count',
+                                      'total_count', 'duration',
+                                      'avg_duration', 'inference_t',
+                                      'process_t', 'result'))
         writer.writeheader()
         writer.writerows(data)
 
