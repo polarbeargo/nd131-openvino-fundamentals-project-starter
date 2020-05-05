@@ -33,6 +33,15 @@ from argparse import ArgumentParser
 from inference import Network
 from csv import DictWriter
 from collections import deque
+
+FORMATTER = log.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+console_handler = log.StreamHandler(sys.stdout)
+console_handler.setFormatter(FORMATTER)
+logger = log.getLogger(__name__)
+logger.setLevel(log.ERROR)
+#logger.setLevel(log.DEBUG)
+logger.addHandler(console_handler)
+
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
@@ -120,8 +129,8 @@ def infer_on_stream(args, client):
     cap.open(input_stream)
     if not cap.isOpened():
         log.error("Unable open video stream")
-    logger.debug("Weight-Height: " + str(capture.get(cv2.CAP_PROP_FRAME_WIDTH)
-                                         ) + "-" + str(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    logger.debug("Weight-Height: " + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+                                         ) + "-" + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     data_list = []
     total_count = 0
     current_count = 0
