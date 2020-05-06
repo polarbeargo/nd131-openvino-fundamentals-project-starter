@@ -291,6 +291,10 @@ def main():
     """
     # Grab command line args
     args = build_argparser().parse_args()
+    print('Called with args:')
+    print(args)
+    print('OpenCV version: {}'.format(cv2.__version__))
+    
     # Connect to the MQTT server
     client = connect_mqtt()
     # Perform inference on the input stream
