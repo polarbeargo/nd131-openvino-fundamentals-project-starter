@@ -24,6 +24,7 @@ import os
 import sys
 import time
 import socket
+import subprocess
 import json
 import cv2
 import logging as log
@@ -33,13 +34,13 @@ from argparse import ArgumentParser
 from inference import Network
 from csv import DictWriter
 from collections import deque
-
-FORMATTER = log.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+FORMATTER = log.Formatter(
+    "%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 console_handler = log.StreamHandler(sys.stdout)
 console_handler.setFormatter(FORMATTER)
 logger = log.getLogger(__name__)
 logger.setLevel(log.ERROR)
-#logger.setLevel(log.DEBUG)
+# logger.setLevel(log.DEBUG)
 logger.addHandler(console_handler)
 
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
@@ -79,9 +80,6 @@ def build_argparser():
                              "CPU, GPU, FPGA or MYRIAD is acceptable. Sample "
                              "will look for a suitable plugin for device "
                              "specified (CPU by default)")
-    parser.add_argument("-pt", "--prob_threshold", type=float, default=0.5,
-                        help="Probability threshold for detections filtering"
-                        "(0.5 by default)")
     parser.add_argument('--rtsp', dest='use_rtsp',
                         help='use IP CAM (remember to also set --uri)',
                         action='store_true')
@@ -251,7 +249,6 @@ def infer_on_stream(args, client):
         cv2.destroyAllWindows()
         client.disconnect()
 
-
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
         writer = DictWriter(outfile, ('time', 'count', 'num_detected',
@@ -262,14 +259,12 @@ def write_csv(data):
         writer.writeheader()
         writer.writerows(data)
 
-
 def count_targets(detections, image):
     num_detections = 0
     draw_bounding_box = image
     if len(detections) > 0:
         draw_bounding_box, num_detections = draw_boxes(detections, image)
     return num_detections, draw_bounding_box
-
 
 def draw_boxes(boxes, image):
     num_detections = 0
@@ -282,6 +277,47 @@ def draw_boxes(boxes, image):
                 num_detections += 1
     return image, num_detections
 
+def open_rtsp_cam(uri, width, height, latency):
+    gst_str = ('rtspsrc location={} latency={} ! '
+               'rtph264depay ! h264parse ! omxh264dec ! '
+               'nvvidconv ! '
+               'video/x-raw, width=(int){}, height=(int){}, '
+               'format=(string)BGRx ! '
+               'videoconvert ! appsink').format(uri, latency, width, height)
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+
+def open_usb_cam(dev, width, height):
+    # We want to set width and height here, otherwise we could just do:
+    #     return cv2.VideoCapture(dev)
+    gst_str = ('v4l2src device=/dev/video{} ! '
+               'video/x-raw, width=(int){}, height=(int){} ! '
+               'videoconvert ! appsink').format(dev, width, height)
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+
+def open_onboard_cam(width, height):
+    gst_elements = str(subprocess.check_output('gst-inspect-1.0'))
+    if 'nvcamerasrc' in gst_elements:
+        # On versions of L4T prior to 28.1, add 'flip-method=2' into gst_str
+        gst_str = ('nvcamerasrc ! '
+                   'video/x-raw(memory:NVMM), '
+                   'width=(int)2592, height=(int)1458, '
+                   'format=(string)I420, framerate=(fraction)30/1 ! '
+                   'nvvidconv ! '
+                   'video/x-raw, width=(int){}, height=(int){}, '
+                   'format=(string)BGRx ! '
+                   'videoconvert ! appsink').format(width, height)
+    elif 'nvarguscamerasrc' in gst_elements:
+        gst_str = ('nvarguscamerasrc ! '
+                   'video/x-raw(memory:NVMM), '
+                   'width=(int)1920, height=(int)1080, '
+                   'format=(string)NV12, framerate=(fraction)30/1 ! '
+                   'nvvidconv flip-method=2 ! '
+                   'video/x-raw, width=(int){}, height=(int){}, '
+                   'format=(string)BGRx ! '
+                   'videoconvert ! appsink').format(width, height)
+    else:
+        raise RuntimeError('onboard camera source not found!')
+    return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
 def main():
     """
@@ -294,12 +330,11 @@ def main():
     print('Called with args:')
     print(args)
     print('OpenCV version: {}'.format(cv2.__version__))
-    
+
     # Connect to the MQTT server
     client = connect_mqtt()
     # Perform inference on the input stream
     infer_on_stream(args, client)
-
 
 if __name__ == '__main__':
     main()
