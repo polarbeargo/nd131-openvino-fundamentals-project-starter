@@ -82,6 +82,15 @@ def build_argparser():
     parser.add_argument("-pt", "--prob_threshold", type=float, default=0.5,
                         help="Probability threshold for detections filtering"
                         "(0.5 by default)")
+    parser.add_argument('--rtsp', dest='use_rtsp',
+                        help='use IP CAM (remember to also set --uri)',
+                        action='store_true')
+    parser.add_argument('--uri', dest='rtsp_uri',
+                        help='RTSP URI, e.g. rtsp://192.168.1.64:554',
+                        default=None, type=str)
+    parser.add_argument('--latency', dest='rtsp_latency',
+                        help='latency in ms for RTSP [200]',
+                        default=200, type=int)
     return parser
 
 
