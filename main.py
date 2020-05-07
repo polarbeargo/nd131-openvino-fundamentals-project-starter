@@ -93,7 +93,7 @@ def build_argparser():
 
 
 def connect_mqtt():
-    ### TODO: Connect to the MQTT client ###
+    # Connect to the MQTT client ###
     client = mqtt.Client()
     client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
     return client
@@ -110,9 +110,6 @@ def infer_on_stream(args, client):
     """
     # Initialise the class
     plugin = Network()
-
-    # Set Probability threshold for detections
-    prob_threshold = args.prob_threshold
 
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
@@ -153,7 +150,7 @@ def infer_on_stream(args, client):
     # Loop until stream is over ###
     while cap.isOpened():
         log_data = {}
-        ### TODO: Read from the video capture ###
+        # Read from the video capture ###
         flag, frame = cap.read()
         if not flag:
             break
@@ -181,7 +178,7 @@ def infer_on_stream(args, client):
             count, box_frame = count_targets(result, frame)
             process_t = time.time() - t1
 
-            ### TODO: Calculate and send relevant information on ###
+            # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
 
