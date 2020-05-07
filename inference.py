@@ -35,7 +35,7 @@ class Network:
     """
 
     def __init__(self):
-        ### TODO: Initialize any class variables desired ###
+        # Initialize any class variables desired ###
         self.plugin = None
         self.network = None
         self.input_blob = None
@@ -83,12 +83,12 @@ class Network:
         return self.plugin
 
     def get_input_shape(self):
-        ### TODO: Return the shape of the input layer ###
+        # Return the shape of the input layer ###
         return self.network.inputs[self.input_blob].shape
 
     def exec_net(self, request_id, frame):
-        ### TODO: Start an asynchronous request ###
-        ### TODO: Return any necessary information ###
+        # Start an asynchronous request ###
+        # Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
         self.input_image_shape = frame.shape
         self.exec_network.start_async(
@@ -97,13 +97,13 @@ class Network:
         return
 
     def wait(self, request_id):
-        ### TODO: Wait for the request to be complete. ###
-        ### TODO: Return any necessary information ###
+        # Wait for the request to be complete. ###
+        # Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
         status = self.exec_network.requests[request_id].wait(-1)
         return status
 
     def get_output(self,request_id):
-        # TODO: Extract and return the output results
+        # Extract and return the output results
         ### Note: You may need to update the function parameters. ###
         return self.exec_network.requests[request_id].outputs[self.output_blob]
