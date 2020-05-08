@@ -89,6 +89,12 @@ def build_argparser():
     parser.add_argument('--latency', dest='rtsp_latency',
                         help='latency in ms for RTSP [200]',
                         default=200, type=int)
+    parser.add_argument('--width', dest='image_width',
+                        help='image width [1920]',
+                        default=1920, type=int)
+    parser.add_argument('--height', dest='image_height',
+                        help='image height [1080]',
+                        default=1080, type=int)
     return parser
 
 
@@ -129,8 +135,16 @@ def infer_on_stream(args, client):
         input_stream = args.input
         assert os.path.isfile(input_stream)
 
-    cap = cv2.VideoCapture(input_stream)
-    cap.open(input_stream)
+    if args.use_rtsp:
+        cap = open_rtsp_cam(args.rtsp_uri,
+                            args.image_width,
+                            args.image_height,
+                            args.rtsp_latency)
+        single_image_mode = False
+    else:
+        cap = cv2.VideoCapture(input_stream)
+        cap.open(input_stream)
+
     if not cap.isOpened():
         log.error("Unable open video stream")
     logger.debug("Weight-Height: " + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)
