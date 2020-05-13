@@ -95,6 +95,9 @@ def build_argparser():
     parser.add_argument('--height', dest='image_height',
                         help='image height [1080]',
                         default=1080, type=int)
+    parser.add_argument("-pt", "--prob_threshold", type=float, default=0.5,
+                        help="Probability threshold for detections filtering"
+                        "(0.5 by default)")
     return parser
 
 
@@ -116,6 +119,9 @@ def infer_on_stream(args, client):
     """
     # Initialise the class
     plugin = Network()
+
+    # Set Probability threshold for detections
+    prob_threshold = args.prob_threshold
 
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
