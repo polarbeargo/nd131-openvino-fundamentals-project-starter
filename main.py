@@ -44,7 +44,6 @@ logger.setLevel(log.ERROR)
 # logger.setLevel(log.DEBUG)
 logger.addHandler(console_handler)
 
-CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
 
@@ -71,11 +70,6 @@ def build_argparser():
                         help="Path to an xml file with a trained model.")
     parser.add_argument("-i", "--input", required=True, type=str,
                         help="Path to image or video file")
-    parser.add_argument("-l", "--cpu_extension", required=False, type=str,
-                        default=None,
-                        help="MKLDNN (CPU)-targeted custom layers."
-                             "Absolute path to a shared library with the"
-                             "kernels impl.")
     parser.add_argument("-d", "--device", type=str, default="CPU",
                         help="Specify the target device to infer on: "
                              "CPU, GPU, FPGA or MYRIAD is acceptable. Sample "
@@ -126,8 +120,7 @@ def infer_on_stream(args, client):
 
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
-                      device=args.device,
-                      cpu_extension=args.cpu_extension)
+                      device=args.device)
     net_input_shape = plugin.get_input_shape()
 
     # Handle the input stream ###
