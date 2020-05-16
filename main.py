@@ -47,10 +47,6 @@ logger.addHandler(console_handler)
 MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
 
-CLASSES = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole',
-           'traffic_light', 'traffic_sign', 'vegetation', 'terrain', 'sky', 'person',
-           'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ego-vehicle']
-
 # MQTT server environment variables
 HOSTNAME = socket.gethostname()
 IPADDRESS = socket.gethostbyname(HOSTNAME)
@@ -298,7 +294,7 @@ def open_rtsp_cam(uri, width, height, latency):
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
 def open_usb_cam(dev, width, height):
-    # We want to set width and height here, otherwise we could just do:
+    # Set width and height here, otherwise we could just do:
     #     return cv2.VideoCapture(dev)
     gst_str = ('v4l2src device=/dev/video{} ! '
                'video/x-raw, width=(int){}, height=(int){} ! '
