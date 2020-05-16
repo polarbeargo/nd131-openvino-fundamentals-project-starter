@@ -112,8 +112,11 @@ def infer_on_stream(args, client):
     plugin = Network()
 
     # Set Probability threshold for detections
-    prob_threshold = args.prob_threshold
-
+    if not args.prob_threshold is None:
+        prob_threshold = args.prob_threshold
+    else:
+        prob_threshold = 0.3
+        
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
                       device=args.device)
