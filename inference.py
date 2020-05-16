@@ -107,3 +107,9 @@ class Network:
         # Extract and return the output results
         ### Note: You may need to update the function parameters. ###
         return self.exec_network.requests[request_id].outputs[self.output_blob]
+
+    def get_all_output(self):
+        result = {}
+        for i in list(self.network.outputs.keys()):
+            result[i] = self.exec_network.requests[0].outputs[i]
+        return result
