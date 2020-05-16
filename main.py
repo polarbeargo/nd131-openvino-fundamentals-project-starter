@@ -116,7 +116,7 @@ def infer_on_stream(args, client):
         prob_threshold = args.prob_threshold
     else:
         prob_threshold = 0.3
-        
+
     # Load the model through `infer_network`
     plugin.load_model(model=args.model,
                       device=args.device)
@@ -182,8 +182,7 @@ def infer_on_stream(args, client):
         if plugin.wait(request_id) == 0:
 
             # Get the results of the inference request ###
-            result = plugin.get_output(
-                request_id)
+            result = plugin.get_all_output()
             t1 = time.time()
             inference_t = t1 - t0
 
