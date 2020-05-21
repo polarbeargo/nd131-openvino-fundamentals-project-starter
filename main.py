@@ -34,6 +34,7 @@ import numpy as np
 from argparse import ArgumentParser
 from inference import Network
 from csv import DictWriter
+from datetime import datetime
 from collections import deque
 FORMATTER = log.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — %(message)s")
@@ -163,10 +164,17 @@ def infer_on_stream(args, client):
     # Loop until stream is over ###
     while cap.isOpened():
         log_data = {}
+
         # Read from the video capture ###
         flag, frame = cap.read()
+
         if not flag:
+            sys.stdout.flush()
             break
+
+        width = int(cap.get(3))
+        height = int(cap.get(4))
+        displayFrame = frame.copy()
 
         # Pre-process the image as needed ###
         logger.debug("size: ".format(net_input_shape))
@@ -187,7 +195,7 @@ def infer_on_stream(args, client):
             inference_t = t1 - t0
 
             # Extract any desired stats from the results ###
-            count, box_frame = count_targets(result, frame)
+            
             process_t = time.time() - t1
 
             # Calculate and send relevant information on ###
