@@ -195,14 +195,62 @@ def infer_on_stream(args, client):
             inference_t = t1 - t0
 
             # Extract any desired stats from the results ###
-            
+            output = result['DetectionOutput']
+            counter = 0
+
+            for detection in output[0][0]:
+                image_id, label, conf, x_min, y_min, x_max, y_max = detection
+
+                if conf > prob_threshold:
+                    print("label " + str(label) + "imageid" + str(image_id))
+                    x_min = int(x_min * width)
+                    x_max = int(x_max * width)
+                    y_min = int(y_min * height)
+                    y_max = int(y_max * height)
+
+                    try:
+                        if conf > 0.85:
+                            crop_target = frame[y_min:y_max, x_min:x_max]
+
+                    except Exception as err:
+                        print(err)
+                        pass
+                    print(err)
+
+                    x_min_diff = last_x_min - x_min
+                    x_max_diff = last_x_max - x_max
+
+                    if x_min_diff > 0 and x_max_diff > 0:  
+                        continue
+
+                    y_min_diff = abs(last_y_min) - abs(y_min)
+
+                    counter = counter + 1
+
+                    last_x_min = x_min
+                    last_x_max = x_max
+                    last_y_max = y_max
+                    last_y_min = y_min
+
+                    cv2.rectangle(displayFrame, (x_min, y_min),
+                                  (x_max, y_max), (0, 255, 0), 2)
+
+                    cv2.putText(displayFrame, (x_max + 10, y_min + 50), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1,
+                                (230, 50, 2),
+                                lineType=cv2.LINE_8, thickness=1)
+
+                    last_detection_time = datetime.now()
+               
+                    if start is None:
+                        start = time.time()
+                        time.clock()
             process_t = time.time() - t1
 
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
 
-            track.append(count)
+            track.append(counter)
             num_detected = 0
 
             if np.sum(track)/max_len > threshold:
@@ -232,7 +280,7 @@ def infer_on_stream(args, client):
                 {"count": num_detected}), retain=True)
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
-        log_data['count'] = count
+        log_data['count'] = counter
         log_data['num_detected'] = num_detected
         log_data['num_persons'] = num_persons
         log_data['prev_count'] = prev_count
@@ -253,8 +301,8 @@ def infer_on_stream(args, client):
             break
 
         # Send the frame to the FFMPEG server ###
-        logger.debug("Image_size: {}".format(box_frame.shape))
-        sys.stdout.buffer.write(box_frame)
+        logger.debug("Image_size: {}".format(displayFrame.shape))
+        sys.stdout.buffer.write(displayFrame)
         sys.stdout.flush()
 
         # Write an output image if `single_image_mode`
