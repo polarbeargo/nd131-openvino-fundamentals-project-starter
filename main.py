@@ -99,6 +99,12 @@ def connect_mqtt():
     client.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
     return client
 
+def pre_process(frame, net_input_shape):
+    logger.debug("size: ".format(net_input_shape))
+    p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
+    p_frame = p_frame.transpose((2, 0, 1))
+    p_frame = p_frame.reshape(net_input_shape)
+    return p_frame
 
 def infer_on_stream(args, client):
     """
@@ -177,14 +183,11 @@ def infer_on_stream(args, client):
         displayFrame = frame.copy()
 
         # Pre-process the image as needed ###
-        logger.debug("size: ".format(net_input_shape))
-        p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
-        p_frame = p_frame.transpose((2, 0, 1))
-        p_frame = p_frame.reshape(net_input_shape)
+        processed_frame = pre_process(frame, net_input_shape)
 
         # Start asynchronous inference for specified request ###
         t0 = time.time()
-        plugin.exec_net(request_id, p_frame)
+        plugin.exec_net(processed_frame)
 
         # Wait for the result ###
         if plugin.wait(request_id) == 0:
@@ -220,7 +223,7 @@ def infer_on_stream(args, client):
                     x_min_diff = last_x_min - x_min
                     x_max_diff = last_x_max - x_max
 
-                    if x_min_diff > 0 and x_max_diff > 0:  
+                    if x_min_diff > 0 and x_max_diff > 0:
                         continue
 
                     y_min_diff = abs(last_y_min) - abs(y_min)
@@ -240,7 +243,7 @@ def infer_on_stream(args, client):
                                 lineType=cv2.LINE_8, thickness=1)
 
                     last_detection_time = datetime.now()
-               
+
                     if start is None:
                         start = time.time()
                         time.clock()
@@ -314,6 +317,7 @@ def infer_on_stream(args, client):
         cv2.destroyAllWindows()
         client.disconnect()
 
+
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
         writer = DictWriter(outfile, ('time', 'count', 'num_detected',
@@ -324,12 +328,14 @@ def write_csv(data):
         writer.writeheader()
         writer.writerows(data)
 
+
 def count_targets(detections, image):
     num_detections = 0
     draw_bounding_box = image
     if len(detections) > 0:
         draw_bounding_box, num_detections = draw_boxes(detections, image)
     return num_detections, draw_bounding_box
+
 
 def draw_boxes(boxes, image):
     num_detections = 0
@@ -342,6 +348,7 @@ def draw_boxes(boxes, image):
                 num_detections += 1
     return image, num_detections
 
+
 def open_rtsp_cam(uri, width, height, latency):
     gst_str = ('rtspsrc location={} latency={} ! '
                'rtph264depay ! h264parse ! omxh264dec ! '
@@ -351,6 +358,7 @@ def open_rtsp_cam(uri, width, height, latency):
                'videoconvert ! appsink').format(uri, latency, width, height)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
+
 def open_usb_cam(dev, width, height):
     # Set width and height here, otherwise we could just do:
     #     return cv2.VideoCapture(dev)
@@ -358,6 +366,7 @@ def open_usb_cam(dev, width, height):
                'video/x-raw, width=(int){}, height=(int){} ! '
                'videoconvert ! appsink').format(dev, width, height)
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
+
 
 def open_onboard_cam(width, height):
     gst_elements = str(subprocess.check_output('gst-inspect-1.0'))
@@ -384,6 +393,7 @@ def open_onboard_cam(width, height):
         raise RuntimeError('onboard camera source not found!')
     return cv2.VideoCapture(gst_str, cv2.CAP_GSTREAMER)
 
+
 def main():
     """
     Load the network and parse the output.
@@ -400,6 +410,7 @@ def main():
     client = connect_mqtt()
     # Perform inference on the input stream
     infer_on_stream(args, client)
+
 
 if __name__ == '__main__':
     main()
