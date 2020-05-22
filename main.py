@@ -324,24 +324,6 @@ def write_csv(data):
         writer.writeheader()
         writer.writerows(data)
 
-def count_targets(detections, image):
-    num_detections = 0
-    draw_bounding_box = image
-    if len(detections) > 0:
-        draw_bounding_box, num_detections = draw_boxes(detections, image)
-    return num_detections, draw_bounding_box
-
-def draw_boxes(boxes, image):
-    num_detections = 0
-    for box in boxes:
-        logger.debug("box: {}".format(box))
-        if box['class_id'] == 0:
-            if box['confidence'] > 0:
-                cv2.rectangle(
-                    image, (box['xmin'], box['ymin']), (box['xmax'], box['ymax']), (0, 255, 0), 1)
-                num_detections += 1
-    return image, num_detections
-
 def open_rtsp_cam(uri, width, height, latency):
     gst_str = ('rtspsrc location={} latency={} ! '
                'rtph264depay ! h264parse ! omxh264dec ! '
@@ -398,6 +380,7 @@ def main():
 
     # Connect to the MQTT server
     client = connect_mqtt()
+
     # Perform inference on the input stream
     infer_on_stream(args, client)
 
