@@ -21,12 +21,10 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-
 import os
 import sys
 import logging as log
 from openvino.inference_engine import IENetwork, IECore
-
 
 class Network:
     """
