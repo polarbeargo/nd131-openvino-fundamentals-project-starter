@@ -46,7 +46,6 @@ logger.setLevel(log.ERROR)
 # logger.setLevel(log.DEBUG)
 logger.addHandler(console_handler)
 
-MODEL_PATH = "/opt/intel/openvino/deployment_tools/demo/nd131-openvino-fundamentals-project-starter/TensorFlow/frozen_inference_graph.xml"
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
 
 # MQTT server environment variables
@@ -194,16 +193,9 @@ def infer_on_stream(args, client):
     logger.debug("Weight-Height: " + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)
                                          ) + "-" + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     data_list = []
-    total_count = 0
-    current_count = 0
-    request_id = 0
-    num_detected = 0
     inference_t = 0
-    max_len = 50
-    prev_count = 0
     duration = 0
     threshold = 0.1
-    track = deque(maxlen=max_len)
     last_detection_time = None
     start = None
     total_unique_targets = []
@@ -304,42 +296,18 @@ def infer_on_stream(args, client):
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-
-            track.append(counter)
-            num_detected = 0
-
-            if np.sum(track)/max_len > threshold:
-                num_detected = 1
-
-            if num_detected > prev_count:
-                start_time = time.time()
-                num_persons = num_detected - prev_count
-                total_count += num_persons
-                prev_count = num_detected
-                client.publish("person", json.dumps(
-                    {"total": total_unique_targets}), retain=True)
+            client.publish("person", json.dumps({"total": total_unique_targets}), retain=True)
 
             ### Topic "person/duration": key of "duration" ###
-            if num_detected < prev_count:
-                prev_count = num_detected
+            
+            avg_duration = time/total_unique_targets
+            client.publish("person/duration",json.dumps({"duration": int(avg_duration)}))
 
-            if num_detected > 0:
-                duration += (time.time() - start_time)/10
-                logger.debug("Duration: {}".format(duration))
-            if total_count > 0:
-                avg_duration = time/total_count
-                client.publish("person/duration",
-                               json.dumps({"duration": int(avg_duration)}))
-
-            client.publish("person", json.dumps(
-                {"count": counter}), retain=True)
+            client.publish("person", json.dumps({"count": counter}), retain=True)
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
         log_data['count'] = counter
-        log_data['num_detected'] = num_detected
-        log_data['num_persons'] = num_persons
-        log_data['prev_count'] = prev_count
-        log_data['total_count'] = total_count
+        log_data['total_count'] = total_unique_targets
         log_data['duration'] = duration
         log_data['avg_duration'] = avg_duration
         log_data['inference_t'] = inference_t
@@ -350,6 +318,7 @@ def infer_on_stream(args, client):
         key_pressed = cv2.waitKey(60)
         if key_pressed == 27:
             write_csv(data_list)
+            print('Write CSV')
             cap.release()
             cv2.destroyAllWindows()
             client.disconnect()
