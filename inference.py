@@ -90,12 +90,11 @@ class Network:
         ### Note: You may need to update the function parameters. ###
         return self.exec_network.start_async(request_id=0,
                                              inputs={self.input_blob: frame})
-    def wait(self, request_id):
+    def wait(self):
         # Wait for the request to be complete. ###
         # Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
-        status = self.exec_network.requests[request_id].wait(-1)
-        return status
+        return self.exec_network.requests[0].wait(-1)
 
     def get_output(self,request_id):
         # Extract and return the output results

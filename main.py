@@ -222,7 +222,7 @@ def infer_on_stream(args, client):
         plugin.exec_net(processed_frame)
 
         # Wait for the result ###
-        if plugin.wait(request_id) == 0:
+        if plugin.wait() == 0:
 
             # Get the results of the inference request ###
             result = plugin.get_all_output()
@@ -298,7 +298,7 @@ def infer_on_stream(args, client):
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            client.publish("person", json.dumps({"count": counter}), "total": len(total_unique_targets)})))
+            client.publish("person", json.dumps({"count": str(counter), "total": len(total_unique_targets)}))
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
         log_data['count'] = counter
