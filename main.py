@@ -282,9 +282,9 @@ def infer_on_stream(args, client):
                         start = time.time()
                         time.clock()
 
-                 if last_detection_time is not None:
+                if last_detection_time is not None:
                     second_diff = (datetime.now() - last_detection_time).total_seconds()
-                   
+    
                     if second_diff >= 1.5:
                         if start is not None:
                             elapsed = time.time() - start
