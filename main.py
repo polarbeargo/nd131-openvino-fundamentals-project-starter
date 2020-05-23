@@ -20,6 +20,7 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
+
 import os
 import sys
 import time
@@ -35,6 +36,7 @@ from inference import Network
 from csv import DictWriter
 from datetime import datetime
 from collections import deque
+from sklearn.metrics.pairwise import cosine_similarity
 FORMATTER = log.Formatter(
     "%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 console_handler = log.StreamHandler(sys.stdout)
@@ -103,6 +105,45 @@ def pre_process(frame, net_input_shape):
     p_frame = p_frame.reshape(net_input_shape)
     return p_frame
 
+def is_previous_detected(plugin, crop_target, net_input_shape, total_unique_targets, conf):
+    idetification_frame = pre_process(
+        crop_target, net_input_shape=net_input_shape)
+    plugin.exec_net(idetification_frame)
+    if plugin.wait() == 0:
+        ident_output = plugin.get_output()
+        for i in range(len(ident_output)):
+            if (len(total_unique_targets) == 0):
+
+                # print(ident_output[i].reshape(1,-1).shape)
+                total_unique_targets.append(ident_output[i].reshape(1, -1))
+            else:
+
+                # print("Checking SIMILARITY WITH PREVIOUS TARGET IF THEY MATCH THEN ALTERTING PERSON COMES SECONF TIME ELSE INCREMENTING TOTAL TARGET")
+                newFound = True
+                detected_target = ident_output[i].reshape(1, -1)
+
+                # Checking that detected target is in list or not
+                for index in range(len(total_unique_targets)):
+                    similarity = cosine_similarity(
+                        detected_target, total_unique_targets[index])[0][0]
+
+                    print(similarity)
+                    if similarity > 0.65:  # 0.58
+                        print("SAME TARGET FOUD")
+
+                        # print(str(similarity) + "at "+str(index))
+                        newFound = False
+
+                        # Update detetected one
+                        total_unique_targets[index] = detected_target
+                        break
+
+                if newFound and conf > 0.90:
+                    total_unique_targets.append(detected_target)
+                    print('NEW TARGET FOUND')
+        print(len(total_unique_targets))
+        return total_unique_targets
+
 def infer_on_stream(args, client):
     """
     Initialize the inference network, stream video to network,
@@ -163,6 +204,9 @@ def infer_on_stream(args, client):
     duration = 0
     threshold = 0.1
     track = deque(maxlen=max_len)
+    last_detection_time = None
+    start = None
+    total_unique_targets = []
 
     # Loop until stream is over ###
     while cap.isOpened():
@@ -211,11 +255,13 @@ def infer_on_stream(args, client):
                     try:
                         if conf > 0.85:
                             crop_target = frame[y_min:y_max, x_min:x_max]
+                            total_unique_targets = is_previous_detected(plugin, crop_target,
+                                                                    net_input_shape, total_unique_targets, conf)
 
+                            process_t = time.time() - t1
                     except Exception as err:
                         print(err)
                         pass
-                    print(err)
 
                     x_min_diff = last_x_min - x_min
                     x_max_diff = last_x_max - x_max
@@ -244,8 +290,17 @@ def infer_on_stream(args, client):
                     if start is None:
                         start = time.time()
                         time.clock()
-            process_t = time.time() - t1
 
+                 if last_detection_time is not None:
+                    second_diff = (datetime.now() - last_detection_time).total_seconds()
+                   
+                    if second_diff >= 1.5:
+                        if start is not None:
+                            elapsed = time.time() - start
+                            client.publish("person/duration", json.dumps({"duration": elapsed - second_diff}))
+                            last_detection_time = None
+                            start = None
+    
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
@@ -262,7 +317,7 @@ def infer_on_stream(args, client):
                 total_count += num_persons
                 prev_count = num_detected
                 client.publish("person", json.dumps(
-                    {"total": total_count}), retain=True)
+                    {"total": total_unique_targets}), retain=True)
 
             ### Topic "person/duration": key of "duration" ###
             if num_detected < prev_count:
@@ -277,7 +332,7 @@ def infer_on_stream(args, client):
                                json.dumps({"duration": int(avg_duration)}))
 
             client.publish("person", json.dumps(
-                {"count": num_detected}), retain=True)
+                {"count": counter}), retain=True)
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
         log_data['count'] = counter
