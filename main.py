@@ -20,7 +20,6 @@
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 
-
 import os
 import sys
 import time
@@ -289,27 +288,22 @@ def infer_on_stream(args, client):
                     if second_diff >= 1.5:
                         if start is not None:
                             elapsed = time.time() - start
-                            client.publish("person/duration", json.dumps({"duration": elapsed - second_diff}))
+                            duration = elapsed - second_diff
+
+                             ### Topic "person/duration": key of "duration" ###
+                            client.publish("person/duration", json.dumps({"duration": duration}))
                             last_detection_time = None
                             start = None
     
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            client.publish("person", json.dumps({"total": total_unique_targets}), retain=True)
-
-            ### Topic "person/duration": key of "duration" ###
-            
-            avg_duration = time/total_unique_targets
-            client.publish("person/duration",json.dumps({"duration": int(avg_duration)}))
-
-            client.publish("person", json.dumps({"count": counter}), retain=True)
+            client.publish("person", json.dumps({"count": counter}), "total": len(total_unique_targets)})))
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
         log_data['count'] = counter
         log_data['total_count'] = total_unique_targets
         log_data['duration'] = duration
-        log_data['avg_duration'] = avg_duration
         log_data['inference_t'] = inference_t
         log_data['process_t'] = process_t
         log_data['result'] = result
@@ -340,11 +334,9 @@ def infer_on_stream(args, client):
 
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
-        writer = DictWriter(outfile, ('time', 'count', 'num_detected',
-                                      'num_persons', 'prev_count',
+        writer = DictWriter(outfile, ('time', 'count',
                                       'total_count', 'duration',
-                                      'avg_duration', 'inference_t',
-                                      'process_t', 'result'))
+                                      'inference_t', 'process_t', 'result'))
         writer.writeheader()
         writer.writerows(data)
 
