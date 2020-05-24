@@ -182,6 +182,7 @@ def infer_on_stream(args, client):
                             args.image_height,
                             args.rtsp_latency)
         single_image_mode = False
+        cap.open()
     else:
         cap = cv2.VideoCapture(input_stream)
         cap.open(input_stream)
@@ -193,7 +194,6 @@ def infer_on_stream(args, client):
     data_list = []
     inference_t = 0
     duration = 0
-    threshold = 0.1
     last_detection_time = None
     start = None
     total_unique_targets = []
