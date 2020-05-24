@@ -8,7 +8,19 @@ questions.
 
 The process behind converting custom layers involves...
 
-Some of the potential reasons for handling custom layers are...
+Some of the potential reasons for handling custom layers are...  
+
+## Running the project
+
+For running the video file
+```
+python3 main.py -i resources/Pedestrian_Detect_2_1_1.mp4 -m frozen_inference_graph.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
+```  
+
+for running a webcam  
+```
+python3 main.py -i CAM -m frozen_inference_graph.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
+```  
 
 ## Comparing Model Performance
 
@@ -25,7 +37,18 @@ The inference time of the model pre- and post-conversion was...
 
 Some of the potential use cases of the people counter app are...
 
+1. Automate Carp Counting
+2. 
+3. 
+4. 
+5. 
+
 Each of these use cases would be useful because...
+1. Automate Carp Counting - 
+2. 
+3. 
+4.
+5. 
 
 ## Assess Effects on End User Needs
 
