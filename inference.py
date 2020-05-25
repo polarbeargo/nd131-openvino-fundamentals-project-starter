@@ -55,7 +55,8 @@ class Network:
             self.plugin.add_extension(cpu_extension, device)
 
         # Read the IR as a IENetwork
-        self.network = IECore.read_network(model=model_xml, weights=model_bin)
+        self.network = IECore.read_network(model=str(model_xml),
+                                              weights=str(os.path.splitext(model_xml)[0] + ".bin"))
 
         # Check for supported layers
         network_supported_layers = self.plugin.query_network(
