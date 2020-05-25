@@ -193,6 +193,7 @@ def infer_on_stream(args, client):
                                          ) + "-" + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
     data_list = []
     inference_t = 0
+    process_t = 0
     duration = 0
     last_detection_time = None
     start = None
