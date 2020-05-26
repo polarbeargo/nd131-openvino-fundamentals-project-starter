@@ -160,8 +160,7 @@ def infer_on_stream(args, client):
         prob_threshold = 0.3
 
     # Load the model through `infer_network`
-    plugin.load_model(model=args.model,
-                      device=args.device)
+    plugin.load_model(args.model, args.cpu_extension, args.device)
     net_input_shape = plugin.get_input_shape()
 
     # Handle the input stream ###

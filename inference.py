@@ -41,10 +41,9 @@ class Network:
         self.exec_network = None
         self.input_image_shape = None
 
-    def load_model(self, model, device="CPU", cpu_extension=None):
+    def load_model(self, model_xml, cpu_extension, device="CPU"):
         ### Note: You may need to update the function parameters. ###
         # Load the model
-        model_xml = model
         model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
         # Initialize the plugin
@@ -56,7 +55,7 @@ class Network:
 
         # Read the IR as a IENetwork
         self.network = IECore.read_network(model=str(model_xml),
-                                              weights=str(os.path.splitext(model_xml)[0] + ".bin"))
+                                              weights=str(model_bin))
 
         # Check for supported layers
         network_supported_layers = self.plugin.query_network(
