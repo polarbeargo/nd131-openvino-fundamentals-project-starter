@@ -1,7 +1,7 @@
 python3 -m venv venv
 source /opt/intel/openvino/bin/setupvars.sh -pyver 3.6
 source venv/bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 mkdir models
 python3 /opt/intel/openvino/deployment_tools/tools/model_downloader/downloader.py --name pedestrian-detection-adas-0002 -o models/ --precisions FP16
 python3 /opt/intel/openvino/deployment_tools/tools/model_downloader/downloader.py --name person-reidentification-retail-0031 -o models/ --precisions FP16
@@ -28,5 +28,5 @@ npm run dev &
 cd ../../
 kill $(sudo lsof -t -i:3004)
 ffserver -f ./ffmpeg/server.conf &
-python3 main.py -i resources/Pedestrian_Detect_2_1_1.mp4 -m models/tensorflow/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.xml -m2 models/intel/person-reidentification-retail-0031/FP16/person-reidentification-retail-0031.xml -d CPU -pt 0.10 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
+python3 main.py -i resources/Pedestrian_Detect_2_1_1.mp4 -m models/tensorflow/ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.xml -d CPU -pt 0.10 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
 
