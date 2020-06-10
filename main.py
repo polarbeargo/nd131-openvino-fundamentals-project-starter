@@ -115,12 +115,8 @@ def is_previous_detected(plugin, crop_target, net_input_shape, total_unique_targ
         ident_output = plugin.get_output()
         for i in range(len(ident_output)):
             if (len(total_unique_targets) == 0):
-
-                # print(ident_output[i].reshape(1,-1).shape)
                 total_unique_targets.append(ident_output[i].reshape(1, -1))
             else:
-
-                # print("Checking SIMILARITY WITH PREVIOUS TARGET IF THEY MATCH THEN ALTERTING PERSON COMES SECONF TIME ELSE INCREMENTING TOTAL TARGET")
                 newFound = True
                 detected_target = ident_output[i].reshape(1, -1)
 
@@ -128,14 +124,10 @@ def is_previous_detected(plugin, crop_target, net_input_shape, total_unique_targ
                 for index in range(len(total_unique_targets)):
                     similarity = cosine_similarity(
                         detected_target, total_unique_targets[index])[0][0]
-
                     print(similarity)
-                    if similarity > 0.65:  # 0.58
+                    if similarity > 0.65:
                         print("SAME TARGET FOUD")
-
-                        # print(str(similarity) + "at "+str(index))
                         newFound = False
-
                         # Update detetected one
                         total_unique_targets[index] = detected_target
                         break
