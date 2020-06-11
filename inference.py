@@ -96,10 +96,11 @@ class Network:
         ### Note: You may need to update the function parameters. ###
         return self.exec_network.requests[0].wait(-1)
 
-    def get_output(self,request_id):
+    def get_output(self):
         # Extract and return the output results
         ### Note: You may need to update the function parameters. ###
-        return self.exec_network.requests[request_id].outputs[self.output_blob]
+        out = self.input_image_shape.outputs[self.output_blob]
+        return out
 
     def get_all_output(self):
         result = {}
