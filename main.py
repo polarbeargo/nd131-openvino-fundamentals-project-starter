@@ -191,6 +191,7 @@ def infer_on_stream(args, client):
     inference_t = 0
     process_t = 0
     duration = 0
+    counter_total = 0
     last_detection_time = None
     start = None
     total_unique_targets = []
@@ -221,85 +222,118 @@ def infer_on_stream(args, client):
         if plugin.wait() == 0:
 
             # Get the results of the inference request ###
-            result = plugin.get_all_output()
+            result = plugin.get_output()
             t1 = time.time()
             inference_t = t1 - t0
 
             # Extract any desired stats from the results ###
-            output = result['DetectionOutput']
-            counter = 0
+            pointer = 0
+            probs = result[0, 0, :, 2]
+            for i, p in enumerate(probs):
+                if p > prob_threshold:
+                    pointer += 1
+                    box = result[0, 0, i, 3:]
+                    p1 = (int(box[0] * width), int(box[1] * height))
+                    p2 = (int(box[2] * width), int(box[3] * height))
+                    frame = cv2.rectangle(frame, p1, p2, (0, 255, 0), 3)
+        
+            if pointer != counter:
+                counter_prev = counter
+                counter = pointer
+                if dur >= 3:
+                    duration_prev = dur
+                    dur = 0
+                else:
+                    dur = duration_prev + dur
+                    duration_prev = 0  # unknown, not needed in this case
+            else:
+                dur += 1
+                if dur >= 3:
+                    report = counter
+                    if dur == 3 and counter > counter_prev:
+                        counter_total += counter - counter_prev
+                    elif dur == 3 and counter < counter_prev:
+                        duration_report = int((duration_prev / 10.0) * 1000)
+            # output = result['DetectionOutput']
+            # counter = 0
 
-            for detection in output[0][0]:
-                image_id, label, conf, x_min, y_min, x_max, y_max = detection
+            # for detection in output[0][0]:
+            #     image_id, label, conf, x_min, y_min, x_max, y_max = detection
 
-                if conf > prob_threshold:
-                    print("label " + str(label) + "imageid" + str(image_id))
-                    x_min = int(x_min * width)
-                    x_max = int(x_max * width)
-                    y_min = int(y_min * height)
-                    y_max = int(y_max * height)
+            #     if conf > prob_threshold:
+            #         x_min = int(x_min * width)
+            #         x_max = int(x_max * width)
+            #         y_min = int(y_min * height)
+            #         y_max = int(y_max * height)
 
-                    try:
-                        if conf > 0.85:
-                            crop_target = frame[y_min:y_max, x_min:x_max]
-                            total_unique_targets = is_previous_detected(plugin, crop_target,
-                                                                    net_input_shape, total_unique_targets, conf)
+            #         try:
+            #             if conf > 0.85:
+            #                 crop_target = frame[y_min:y_max, x_min:x_max]
+            #                 total_unique_targets = is_previous_detected(plugin, crop_target,
+            #                                                         net_input_shape, total_unique_targets, conf)
 
-                            process_t = time.time() - t1
-                    except Exception as err:
-                        print(err)
-                        pass
+            #                 process_t = time.time() - t1
+            #         except Exception as err:
+            #             print(err)
+            #             pass
 
-                    x_min_diff = last_x_min - x_min
-                    x_max_diff = last_x_max - x_max
+            #         x_min_diff = last_x_min - x_min
+            #         x_max_diff = last_x_max - x_max
 
-                    if x_min_diff > 0 and x_max_diff > 0:
-                        continue
+            #         if x_min_diff > 0 and x_max_diff > 0:
+            #             continue
 
-                    y_min_diff = abs(last_y_min) - abs(y_min)
+            #         y_min_diff = abs(last_y_min) - abs(y_min)
 
-                    counter = counter + 1
+            #         counter = counter + 1
 
-                    last_x_min = x_min
-                    last_x_max = x_max
-                    last_y_max = y_max
-                    last_y_min = y_min
+            #         last_x_min = x_min
+            #         last_x_max = x_max
+            #         last_y_max = y_max
+            #         last_y_min = y_min
 
-                    cv2.rectangle(displayFrame, (x_min, y_min),
-                                  (x_max, y_max), (0, 255, 0), 2)
+            #         cv2.rectangle(displayFrame, (x_min, y_min),
+            #                       (x_max, y_max), (0, 255, 0), 2)
 
-                    cv2.putText(displayFrame, (x_max + 10, y_min + 50), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1,
-                                (230, 50, 2),
-                                lineType=cv2.LINE_8, thickness=1)
+            #         cv2.putText(displayFrame, (x_max + 10, y_min + 50), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1,
+            #                     (230, 50, 2),
+            #                     lineType=cv2.LINE_8, thickness=1)
 
-                    last_detection_time = datetime.now()
+            #         last_detection_time = datetime.now()
 
-                    if start is None:
-                        start = time.time()
-                        time.clock()
+            #         if start is None:
+            #             start = time.time()
+            #             time.clock()
 
-                if last_detection_time is not None:
-                    second_diff = (datetime.now() - last_detection_time).total_seconds()
+            #     if last_detection_time is not None:
+            #         second_diff = (datetime.now() - last_detection_time).total_seconds()
     
-                    if second_diff >= 1.5:
-                        if start is not None:
-                            elapsed = time.time() - start
-                            duration = elapsed - second_diff
+            #         if second_diff >= 1.5:
+            #             if start is not None:
+            #                 elapsed = time.time() - start
+            #                 duration = elapsed - second_diff
 
                              ### Topic "person/duration": key of "duration" ###
-                            client.publish("person/duration", json.dumps({"duration": duration}))
-                            last_detection_time = None
-                            start = None
-    
+                            # client.publish("person/duration", json.dumps({"duration": duration}))
+                            # last_detection_time = None
+                            # start = None
+            client.publish('person',
+                           payload=json.dumps({
+                               'count': report, 'total': counter_total}),
+                           qos=0, retain=False)
+            if duration_report is not None:
+                client.publish('person/duration',
+                               payload=json.dumps({'duration': duration_report}),
+                               qos=0, retain=False)
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            client.publish("person", json.dumps({"count": str(counter), "total": len(total_unique_targets)}))
+            # client.publish("person", json.dumps({"count": str(counter), "total": len(total_unique_targets)}))
 
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
-        log_data['count'] = counter
-        log_data['total_count'] = total_unique_targets
-        log_data['duration'] = duration
+        log_data['count'] = report
+        log_data['total_count'] = counter_total
+        log_data['duration'] = duration_report
         log_data['inference_t'] = inference_t
         log_data['process_t'] = process_t
         log_data['result'] = result
