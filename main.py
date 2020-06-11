@@ -104,7 +104,7 @@ def connect_mqtt():
 def pre_process(frame, net_input_shape):
     p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
     p_frame = p_frame.transpose((2, 0, 1))
-    p_frame = p_frame.reshape(net_input_shape)
+    p_frame = p_frame.reshape(1, *p_frame.shape)
     return p_frame
 
 def is_previous_detected(plugin, crop_target, net_input_shape, total_unique_targets, conf):
