@@ -1,6 +1,8 @@
 python3 -m venv venv
-source /opt/intel/openvino/bin/setupvars.sh -pyver 3.6
+source /opt/intel/openvino/bin/setupvars.sh -pyver 3.5
 source venv/bin/activate
+pip3 install opencv-python
+pip3 install paho-mqtt python-etcd
 pip3 install -r requirements.txt
 cd webservice/server
 npm install
