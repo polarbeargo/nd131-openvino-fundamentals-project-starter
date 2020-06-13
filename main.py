@@ -254,65 +254,7 @@ def infer_on_stream(args, client):
                         counter_total += counter - counter_prev
                     elif dur == 3 and counter < counter_prev:
                         duration_report = int((duration_prev / 10.0) * 1000)
-            # output = result['DetectionOutput']
-            # counter = 0
-
-            # for detection in output[0][0]:
-            #     image_id, label, conf, x_min, y_min, x_max, y_max = detection
-
-            #     if conf > prob_threshold:
-            #         x_min = int(x_min * width)
-            #         x_max = int(x_max * width)
-            #         y_min = int(y_min * height)
-            #         y_max = int(y_max * height)
-
-            #         try:
-            #             if conf > 0.85:
-            #                 crop_target = frame[y_min:y_max, x_min:x_max]
-            #                 total_unique_targets = is_previous_detected(plugin, crop_target,
-            #                                                         net_input_shape, total_unique_targets, conf)
-
-            #                 process_t = time.time() - t1
-            #         except Exception as err:
-            #             print(err)
-            #             pass
-
-            #         x_min_diff = last_x_min - x_min
-            #         x_max_diff = last_x_max - x_max
-
-            #         if x_min_diff > 0 and x_max_diff > 0:
-            #             continue
-
-            #         y_min_diff = abs(last_y_min) - abs(y_min)
-
-            #         counter = counter + 1
-
-            #         last_x_min = x_min
-            #         last_x_max = x_max
-            #         last_y_max = y_max
-            #         last_y_min = y_min
-
-            #         cv2.rectangle(displayFrame, (x_min, y_min),
-            #                       (x_max, y_max), (0, 255, 0), 2)
-
-            #         cv2.putText(displayFrame, (x_max + 10, y_min + 50), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1,
-            #                     (230, 50, 2),
-            #                     lineType=cv2.LINE_8, thickness=1)
-
-            #         last_detection_time = datetime.now()
-
-            #         if start is None:
-            #             start = time.time()
-            #             time.clock()
-
-            #     if last_detection_time is not None:
-            #         second_diff = (datetime.now() - last_detection_time).total_seconds()
-    
-            #         if second_diff >= 1.5:
-            #             if start is not None:
-            #                 elapsed = time.time() - start
-            #                 duration = elapsed - second_diff
-
+            
                              ### Topic "person/duration": key of "duration" ###
                             # client.publish("person/duration", json.dumps({"duration": duration}))
                             # last_detection_time = None
