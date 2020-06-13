@@ -48,14 +48,13 @@ class Network:
 
         # Initialize the plugin
         self.plugin = IECore()
-
+        self.network = IENetwork(model=model_xml, weights=model_bin)
         # Add a CPU extension, if applicable
         if cpu_extension and "CPU" in device:
             self.plugin.add_extension(cpu_extension, device)
 
         # Read the IR as a IENetwork
-        self.network = self.plugin.read_network(model=str(model_xml),
-                                              weights=str(model_bin))
+        self.network = self.plugin.load_network(self.network, device)
 
         # Check for supported layers
         network_supported_layers = self.plugin.query_network(
