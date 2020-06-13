@@ -48,13 +48,13 @@ class Network:
 
         # Initialize the plugin
         self.plugin = IECore()
+        
+        # Read the IR as a IENetwork
         self.network = IENetwork(model=model_xml, weights=model_bin)
+        
         # Add a CPU extension, if applicable
         if cpu_extension and "CPU" in device:
             self.plugin.add_extension(cpu_extension, device)
-
-        # Read the IR as a IENetwork
-        self.network = self.plugin.load_network(self.network, device)
 
         # Check for supported layers
         network_supported_layers = self.plugin.query_network(
@@ -65,7 +65,7 @@ class Network:
             if layer not in network_supported_layers:
                 not_supported_layers.append(layer)
         if len(not_supported_layers) > 0:
-            log.debug("Not supported layers in model: ".format(
+            print(" Not supported layers in model:{} ".format(
                 not_supported_layers))
             exit(1)
 
