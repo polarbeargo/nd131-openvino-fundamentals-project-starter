@@ -107,36 +107,25 @@ def pre_process(frame, net_input_shape):
     p_frame = p_frame.reshape(1, *p_frame.shape)
     return p_frame
 
-def is_previous_detected(plugin, crop_target, net_input_shape, total_unique_targets, conf):
-    idetification_frame = pre_process(
-        crop_target, net_input_shape=net_input_shape)
-    plugin.exec_net(idetification_frame)
-    if plugin.wait() == 0:
-        ident_output = plugin.get_output()
-        for i in range(len(ident_output)):
-            if (len(total_unique_targets) == 0):
-                total_unique_targets.append(ident_output[i].reshape(1, -1))
-            else:
-                newFound = True
-                detected_target = ident_output[i].reshape(1, -1)
-
-                # Checking that detected target is in list or not
-                for index in range(len(total_unique_targets)):
-                    similarity = cosine_similarity(
-                        detected_target, total_unique_targets[index])[0][0]
-                    print(similarity)
-                    if similarity > 0.65:
-                        print("SAME TARGET FOUD")
-                        newFound = False
-                        # Update detetected one
-                        total_unique_targets[index] = detected_target
-                        break
-
-                if newFound and conf > 0.90:
-                    total_unique_targets.append(detected_target)
-                    print('NEW TARGET FOUND')
-        print(len(total_unique_targets))
-        return total_unique_targets
+def draw_outputs(frame,output_result,prob_threshold, width, height):
+    """
+    Draw bounding boxes onto the frame.
+    :param frame: frame from camera/video
+    :param result: list contains the data comming from inference
+    :return: person count and frame
+    """
+    counter=0
+    start = None
+    end = None 
+    color = (0, 255, 0)
+    thickness = 1
+    for box in output_result[0][0]:
+        if box[2] > prob_threshold:
+            start = (int(box[3] * width), int(box[4] * height))
+            end = (int(box[5] * width), int(box[6] * height))
+            frame = cv2.rectangle(frame, start, end, color,thickness)
+            counter+=1
+    return frame, counter
 
 def infer_on_stream(args, client):
     """
@@ -209,14 +198,17 @@ def infer_on_stream(args, client):
 
         width = int(cap.get(3))
         height = int(cap.get(4))
-        displayFrame = frame.copy()
+        #displayFrame = frame.copy()
 
         # Pre-process the image as needed ###
-        processed_frame = pre_process(frame, net_input_shape)
+        #processed_frame = pre_process(frame, net_input_shape)
+        p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
+        p_frame = p_frame.transpose((2,0,1))
+        p_frame = p_frame.reshape(1, *p_frame.shape)
 
         # Start asynchronous inference for specified request ###
         t0 = time.time()
-        plugin.exec_net(processed_frame)
+        plugin.exec_net(p_frame)
 
         # Wait for the result ###
         if plugin.wait() == 0:
@@ -228,15 +220,12 @@ def infer_on_stream(args, client):
 
             # Extract any desired stats from the results ###
             pointer = 0
-            probs = result[0, 0, :, 2]
-            for i, p in enumerate(probs):
-                if p > prob_threshold:
-                    pointer += 1
-                    box = result[0, 0, i, 3:]
-                    p1 = (int(box[0] * width), int(box[1] * height))
-                    p2 = (int(box[2] * width), int(box[3] * height))
-                    frame = cv2.rectangle(frame, p1, p2, (0, 255, 0), 3)
-        
+            displayFrame, pointer = draw_outputs(frame, result, prob_threshold, width, height)
+            inference_t_message = "Manasse_Ngudia | Inference time: {:.3f}ms"\
+                               .format(inference_t)
+            cv2.putText(displayFrame, inference_t_message, (15, 15),
+                       cv2.FONT_HERSHEY_COMPLEX, 0.45, (200, 10, 10), 1)
+
             if pointer != counter:
                 counter_prev = counter
                 counter = pointer
@@ -245,7 +234,7 @@ def infer_on_stream(args, client):
                     dur = 0
                 else:
                     dur = duration_prev + dur
-                    duration_prev = 0  # unknown, not needed in this case
+                    duration_prev = 0 
             else:
                 dur += 1
                 if dur >= 3:
@@ -291,18 +280,17 @@ def infer_on_stream(args, client):
             break
 
         # Send the frame to the FFMPEG server ###
-        logger.debug("Image_size: {}".format(displayFrame.shape))
         sys.stdout.buffer.write(displayFrame)
         sys.stdout.flush()
 
         # Write an output image if `single_image_mode`
         if single_image_mode:
-            cv2.imwrite("output.jpg",)
+            cv2.imwrite("output.jpg", displayFrame)
 
-        write_csv(data_list)
-        cap.release()
-        cv2.destroyAllWindows()
-        client.disconnect()
+    write_csv(data_list)
+    cap.release()
+    cv2.destroyAllWindows()
+    client.disconnect()
 
 def write_csv(data):
     with open('./log.csv', 'w') as outfile:
