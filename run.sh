@@ -1,6 +1,8 @@
 python3 -m venv venv
 source /opt/intel/openvino/bin/setupvars.sh -pyver 3.5
 source venv/bin/activate
+mkdir models
+python3  /opt/intel/openvino/deployment_tools/tools/model_downloader/downloader.py --name person-detection-retail-0013 -o models/
 pip3 install opencv-python
 pip3 install paho-mqtt python-etcd
 pip3 install -r requirements.txt
