@@ -170,8 +170,11 @@ def infer_on_stream(args, client):
     data_list = []
     inference_t = 0
     process_t = 0
-    duration = 0
+    counter_prev = 0
+    duration_report = 0
     counter = 0
+    dur = 0
+    report = 0
     counter_total = 0
     last_detection_time = None
     start = None
@@ -213,7 +216,7 @@ def infer_on_stream(args, client):
             # Extract any desired stats from the results ###
             pointer = 0
             displayFrame, pointer = draw_outputs(frame, result, prob_threshold, width, height)
-            inference_t_message = "Manasse_Ngudia | Inference time: {:.3f}ms"\
+            inference_t_message = "Inference time: {:.3f}ms"\
                                .format(inference_t)
             cv2.putText(displayFrame, inference_t_message, (15, 15),
                        cv2.FONT_HERSHEY_COMPLEX, 0.45, (200, 10, 10), 1)
