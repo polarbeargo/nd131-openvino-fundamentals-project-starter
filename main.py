@@ -35,15 +35,6 @@ from inference import Network
 from csv import DictWriter
 from datetime import datetime
 from collections import deque
-from sklearn.metrics.pairwise import cosine_similarity
-FORMATTER = log.Formatter(
-    "%(asctime)s — %(name)s — %(levelname)s — %(message)s")
-console_handler = log.StreamHandler(sys.stdout)
-console_handler.setFormatter(FORMATTER)
-logger = log.getLogger(__name__)
-logger.setLevel(log.ERROR)
-# logger.setLevel(log.DEBUG)
-logger.addHandler(console_handler)
 
 VIDEO_PATH = "resources/Pedestrian_Detect_2_1_1.mp4"
 
