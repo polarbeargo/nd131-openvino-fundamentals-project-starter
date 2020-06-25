@@ -98,8 +98,7 @@ class Network:
     def get_output(self):
         # Extract and return the output results
         ### Note: You may need to update the function parameters. ###
-        out = self.input_image_shape.outputs[self.output_blob]
-        return out
+        return self.exec_network.requests[0].outputs[self.output_blob]
 
     def get_all_output(self):
         result = {}
