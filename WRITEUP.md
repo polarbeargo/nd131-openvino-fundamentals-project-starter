@@ -19,11 +19,11 @@ python main.py -i resources/Pedestrian_Detect_2_1_1.mp4 -m models/intel/person-d
 
 For running a camera  
 ```
-python3 main.py -i CAM -m frozen_inference_graph.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
+python3 main.py -i CAM -m models/intel/person-detection-retail-0013/FP16/person-detection-retail-0013.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
 ```  
 For running a IP CAM
 ```
-python3 main.py --rtsp --uri http://0.0.0.0:3004/fac.ffm  -m frozen_inference_graph.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
+python3 main.py --rtsp --uri http://0.0.0.0:3004/fac.ffm  -m models/intel/person-detection-retail-0013/FP16/person-detection-retail-0013.xml -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
 ```
 
 
@@ -42,18 +42,18 @@ The inference time of the model pre- and post-conversion was...
 
 Some of the potential use cases of the people counter app are...
 
-1. Automate Carp Counting
-2. 
-3. 
-4. 
-5. 
+1. Automate Carp counting
+2. Automate road repair spot counting
+3. Automate mosquitoes vector counting
+4. Automate rust spot counting
+5. Automate drop trash with abandon spot counting.
 
 Each of these use cases would be useful because...
-1. Automate Carp Counting - 
-2. 
-3. 
-4.
-5. 
+1. Automate Carp counting
+2. Automate road repair spot counting
+3. Automate mosquitoes vector counting
+4. Automate rust spot counting
+5. Automate drop trash with abandon spot counting.
 
 ## Assess Effects on End User Needs
 
@@ -69,42 +69,43 @@ a successful model.]
 In investigating potential people counter models, I tried each of the following three models:
 
 - Model 1: ssd_inception_v2_coco
-  - [http://download.tensorflow.org/models/object_detection/ssd_inception_v2_coco_2018_01_28.tar.gz]
-  - I converted the model to an Intermediate Representation with the following arguments...
-  - The model was insufficient for the app because...
-  - I tried to improve the model for the app by...
+  - http://download.tensorflow.org/models/object_detection/ssd_inception_v2_coco_2018_01_28.tar.gz
+  - I converted the model to an Intermediate Representation with the following arguments:
    ```
   python /opt/intel/openvino/deployment_tools/model_optimizer/mo.py --input_model frozen_inference_graph.pb --tensorflow_object_detection_api_pipeline_config pipeline.config --reverse_input_channels --tensorflow_use_custom_operations_config /opt/intel/openvino/deployment_tools/model_optimizer/extensions/front/tf/ssd_v2_support.json
   ```
+  - The model was insufficient for the app because it does not work correctly and it can't count correctly the people in the frame.
+  - I tried to improve the model for the app by adust prob_threshold but still nothing improved.  
 - Model 2: faster_rcnn_inception_v2_coco
-  - [http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz]
-  - I converted the model to an Intermediate Representation with the following arguments...
-  - The model was insufficient for the app because...
-  - I tried to improve the model for the app by...
+  - http://download.tensorflow.org/models/object_detection/faster_rcnn_inception_v2_coco_2018_01_28.tar.gz
+  - I converted the model to an Intermediate Representation with the following arguments:
  ```
     python /opt/intel/openvino/deployment_tools/model_optimizer/mo.py --input_model model/faster_rcnn_inception_v2_coco/frozen_inference_graph.pb --tensorflow_object_detection_api_pipeline_config pipeline.config --reverse_input_channels --tensorflow_use_custom_operations_config /opt/intel/openvino/deployment_tools/model_optimizer/extensions/front/tf/faster_rcnn_support.json
  ```
+ - The model was insufficient for the app because working better than previos one.
+  - I tried to improve the model for the app by change prob_threshold to 0.3 but not obviously improved.  
 - Model 3: ssd_mobilenet_v2_coco
-  - [http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz]
-  - I converted the model to an Intermediate Representation with the following arguments...
-  - The model was insufficient for the app because...
-  - I tried to improve the model for the app by...
+  - http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz
+  - I converted the model to an Intermediate Representation with the following arguments:
   ```
   python /opt/intel/openvino/deployment_tools/model_optimizer/mo_tf.py --input_model frozen_inference_graph.pb --tensorflow_object_detection_api_pipeline_config pipeline.config --tensorflow_use_custom_operations_config /opt/intel/openvino/deployment_tools/model_optimizer/extensions/front/tf/ssd_v2_support.json --reverse_input_channel
   ```
+  - The model was good for the app.
+  - I tried to improve the model for the app by change prob_threshold to 0.3 and the model works well though missing draw box around people in some particular time.
+  
+## Result  
+After run inference on above models, the suitable accurate model was the one provided by Intel® [person-detection-retail-0013](https://docs.openvinotoolkit.org/latest/_models_intel_person_detection_retail_0013_description_person_detection_retail_0013.html) with the already existing in Intermediate Representations.  
 - Model 4: person-detection-retail-0013
 [person-detection-retail-0013](https://docs.openvinotoolkit.org/latest/_models_intel_person_detection_retail_0013_description_person_detection_retail_0013.html)
 
 Use this commad to dowload the model 
 
 ```
-python3  /opt/intel/openvino/deployment_tools/tools/model_downloader/downloader.py --name person-detection-retail-0013 -o /home/workspace/model/pre_trained/intel
+python3  /opt/intel/openvino/deployment_tools/tools/model_downloader/downloader.py --name person-detection-retail-0013 -o models/
 ```
 
 Run the app 
 ```
 python main.py -i resources/Pedestrian_Detect_2_1_1.mp4 -m models/intel/person-detection-retail-0013/FP16/person-detection-retail-0013.xml -l /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so -d CPU -pt 0.6 | ffmpeg -v warning -f rawvideo -pixel_format bgr24 -video_size 768x432 -framerate 24 -i - http://0.0.0.0:3004/fac.ffm
 ```
-## Result  
-After run inference on above models, the suitable accurate model was the one provided by Intel® [person-detection-retail-0013](https://docs.openvinotoolkit.org/latest/_models_intel_person_detection_retail_0013_description_person_detection_retail_0013.html) with the already existing in Intermediate Representations.  
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/tYFthd5Ol7M/0.jpg)](https://youtu.be/tYFthd5Ol7M)  
