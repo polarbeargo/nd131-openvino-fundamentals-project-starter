@@ -171,6 +171,7 @@ def infer_on_stream(args, client):
     inference_t = 0
     process_t = 0
     duration = 0
+    counter = 0
     counter_total = 0
     last_detection_time = None
     start = None
