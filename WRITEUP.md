@@ -58,7 +58,12 @@ Each of these use cases would be useful because...
 ## Assess Effects on End User Needs
 
 Lighting, model accuracy, and camera focal length/image size have different effects on a
-deployed edge model. The potential effects of each of these are as follows...
+deployed edge model. The potential effects of each of these are as follows:
+
+- Lighting: Lighting is essential factor affects to the result of model. In poor light enviroment, model can't predict accurately if input image is totally dark. So IP camera must place with enough light or we apply transfer learning train our model in low light environment but still if totally dark it wouldn't help.
+- Model accuracy: Deployed model on edge must have high accuracy because edge device works in real time if we deployed low accuracy model then it would give great results which is not oleasant for end users.
+- Camera focal length: It's depend on user reuqirements which type of camera is required. If users want to surveillance wider place than The shorter the focal length camera is better but model can extract less information about object's in picture so it can lower the accuracy. In compare if users want to surveillance narrow place then they can use longer the focal length camera. The longer the focal length, the narrower the angle of view and the higher the magnification. The shorter the focal length, the wider the angle of view and the lower the magnification. 
+- Image size: Image size relate to the resolution of image. High quality images the size will be larger. Model can provide better result if image resolution is better but with higher resolution image model can take more time to inference and provide results than low quality images and also use more memory. If users have more memory and also can accept with some delay for more accurate result then higher resoltuion means larger image can be use. We usually need image size same as the image size used to train models to provide good accuracy.
 
 ## Model Research
 
