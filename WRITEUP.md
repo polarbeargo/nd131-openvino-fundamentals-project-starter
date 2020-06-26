@@ -25,13 +25,18 @@ python3 main.py --rtsp --uri http://0.0.0.0:3004/fac.ffm  -m models/intel/person
 ## Comparing Model Performance
 
 My method(s) to compare models before and after conversion to Intermediate Representations
-were...
+were:  
+- Comparing the size of both models
+- Comparing the accuracy of models
+- Comparing the inference time of pre- and post-conversio models
 
-The difference between model accuracy pre- and post-conversion was...
+The difference between model accuracy, size and inference time of pre- and post-conversion as follow:
 
-The size of the model pre- and post-conversion was...
-
-The inference time of the model pre- and post-conversion was...
+Parameters | pre-conversion | post-conversion
+| ------------- | ------------- | -------------
+size  | 69.7 MB  | 67.5 MB
+accuracy  | 0.659482432  | 0.6492571
+inference time  | 4828.266 ms  | 35.72 ms
 
 ## Assess Model Use Cases
 
