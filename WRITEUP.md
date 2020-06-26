@@ -42,18 +42,18 @@ inference time  | 4828.266 ms  | 35.72 ms
 
 Some of the potential use cases of the people counter app are...
 
-1. Automate Carp counting
-2. Automate road repair spot counting
-3. Automate mosquitoes vector counting
-4. Automate rust spot counting
+1. Automate Carp counting.
+2. Automate road repair spot counting.
+3. Automate mosquitoes vector counting.
+4. Automate rust spot counting.
 5. Automate drop trash with abandon spot counting.
 
 Each of these use cases would be useful because...
-1. Automate Carp counting
-2. Automate road repair spot counting
-3. Automate mosquitoes vector counting
-4. Automate rust spot counting
-5. Automate drop trash with abandon spot counting.
+1. Automate Carp counting - Automatically detect and classify simple specie of carp to species suchas sharks,tunas and more which catch by fishing boats will accelerate the video review process. Reliable data and Faster review will enable Taiwan aquaculture to reallocate human capital to management and enforcement activities which can help on conservation and our planet.
+2. Automate road repair spot counting - Automatically detect and classify road repair spot will accelerate the video review process. Reliable data and Faster review will help Ａustralia and Taiwan road repair fleet management. 
+3. Automate mosquitoes vector counting - To help control dengue fever applying transfer learning to train new model with mosquitoes vector images to detect, classify and count mosquitoe vectors as it reach specific count then spray drugs to kill mosquitoe vectors.
+4. Automate rust spot counting - Automatically localize rust location in Taiwan bridge or building to help derusting fleet management.
+5. Automate drop trash with abandon spot counting - For Taiwan public health, automatically detect drop trash with abandon spot will help garbage truck fleet management and provide citizen clean environment.
 
 ## Assess Effects on End User Needs
 
