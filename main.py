@@ -48,7 +48,6 @@ MQTT_KEEPALIVE_INTERVAL = 60
 def build_argparser():
     """
     Parse command line arguments.
-
     :return: command line arguments
     """
     parser = ArgumentParser()
@@ -122,7 +121,6 @@ def infer_on_stream(args, client):
     """
     Initialize the inference network, stream video to network,
     and output stats and video.
-
     :param args: Command line arguments parsed by `build_argparser()`
     :param client: MQTT client
     :return: None
@@ -172,11 +170,11 @@ def infer_on_stream(args, client):
     process_t = 0
     counter_prev = 0
     duration_report = 0
+    counter_total = 0
     counter = 0
+    last_detection_time = None
     dur = 0
     report = 0
-    counter_total = 0
-    last_detection_time = None
     start = None
     total_unique_targets = []
 
@@ -340,7 +338,6 @@ def open_onboard_cam(width, height):
 def main():
     """
     Load the network and parse the output.
-
     :return: None
     """
     # Grab command line args
