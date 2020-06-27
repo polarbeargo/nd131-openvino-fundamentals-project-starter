@@ -168,15 +168,11 @@ def infer_on_stream(args, client):
     data_list = []
     inference_t = 0
     process_t = 0
-    counter_prev = 0
-    duration_report = 0
-    counter_total = 0
+    prev_count = 0
+    total_count = 0
+    duration = 0
     counter = 0
-    last_detection_time = None
-    dur = 0
-    report = 0
     start = None
-    total_unique_targets = []
 
     # Loop until stream is over ###
     while cap.isOpened():
@@ -213,51 +209,33 @@ def infer_on_stream(args, client):
 
             # Extract any desired stats from the results ###
             pointer = 0
-            displayFrame, pointer = draw_outputs(frame, result, prob_threshold, width, height)
+            displayFrame, cur_count = draw_outputs(frame, result, prob_threshold, width, height)
             inference_t_message = "Inference time: {:.3f}ms"\
                                .format(inference_t)
             cv2.putText(displayFrame, inference_t_message, (15, 15),
                        cv2.FONT_HERSHEY_COMPLEX, 0.45, (200, 10, 10), 1)
 
-            if pointer != counter:
-                counter_prev = counter
-                counter = pointer
-                if dur >= 3:
-                    duration_prev = dur
-                    dur = 0
-                else:
-                    dur = duration_prev + dur
-                    duration_prev = 0 
-            else:
-                dur += 1
-                if dur >= 3:
-                    report = counter
-                    if dur == 3 and counter > counter_prev:
-                        counter_total += counter - counter_prev
-                    elif dur == 3 and counter < counter_prev:
-                        duration_report = int((duration_prev / 10.0) * 1000)
-            
-                             ### Topic "person/duration": key of "duration" ###
-                            # client.publish("person/duration", json.dumps({"duration": duration}))
-                            # last_detection_time = None
-                            # start = None
-            client.publish('person',
-                           payload=json.dumps({
-                               'count': report, 'total': counter_total}),
-                           qos=0, retain=False)
-            if duration_report is not None:
-                client.publish('person/duration',
-                               payload=json.dumps({'duration': duration_report}),
-                               qos=0, retain=False)
+            if cur_count > prev_count:
+                start_time = time.time()
+                total_count = total_count + cur_count - prev_count
+                client.publish("person", json.dumps({"total": total_count}))
+
+            if cur_count < prev_count:
+                duration = int(time.time() - start_time)
+                # Publish messages to the MQTT server
+                client.publish("person/duration",
+                               json.dumps({"duration": duration}))
+                
             # Calculate and send relevant information on ###
             ### current_count, total_count and duration to the MQTT server ###
             ### Topic "person": keys of "count" and "total" ###
-            # client.publish("person", json.dumps({"count": str(counter), "total": len(total_unique_targets)}))
-
+            client.publish("person", json.dumps({"count": cur_count}))
+            prev_count = cur_count
+            
         log_data['time'] = time.strftime("%H:%M:%S", time.localtime())
-        log_data['count'] = report
-        log_data['total_count'] = counter_total
-        log_data['duration'] = duration_report
+        log_data['count'] = cur_count
+        log_data['total_count'] = total_count
+        log_data['duration'] = duration
         log_data['inference_t'] = inference_t
         log_data['process_t'] = process_t
         log_data['result'] = result
