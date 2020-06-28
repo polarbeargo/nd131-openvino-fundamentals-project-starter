@@ -24,11 +24,39 @@ python3 main.py --rtsp --uri http://0.0.0.0:3004/fac.ffm  -m models/intel/person
 
 ## Comparing Model Performance
 
-My method(s) to compare models before and after conversion to Intermediate Representations
+My method to compare [ssd_mobilenet_v2_coco_2018_03_29](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz) before and after conversion to Intermediate Representations is calculate `total_inference_time = inference_end_time - inference_start_time` around execuete the following code: 
+- pre-conversion
+```
+inference_start_time = time.time()
+sess.run([sess.graph.get_tensor_by_name('num_detections:0'),
+                            sess.graph.get_tensor_by_name('detection_scores:0'),
+                            sess.graph.get_tensor_by_name('detection_boxes:0'),
+                            sess.graph.get_tensor_by_name('detection_classes:0')],
+                           feed_dict={
+                               'image_tensor:0': img.reshape(1,
+                                                             img.shape[0],
+                                                             img.shape[1], 3)})
+inference_end_time = time.time()
+total_inference_time = inference_end_time - inference_start_time
+```    
+- post-conversion  
+```
+t0 = time.time()
+plugin.exec_net(p_frame)
+
+# Wait for the result ###
+if plugin.wait() == 0:
+
+   # Get the results of the inference request ###
+   result = plugin.get_output()
+   t1 = time.time()
+   inference_t = t1 - t0
+```
+
 were:  
-- Comparing the size of both models
-- Comparing the accuracy of models
-- Comparing the inference time of pre- and post-conversio models
+- Comparing the size of both model
+- Comparing the accuracy of model
+- Comparing the inference time of pre- and post-conversio model
 
 The difference between model accuracy, size and inference time of pre- and post-conversion as follow:
 
@@ -66,10 +94,6 @@ deployed edge model. The potential effects of each of these are as follows:
 - Image size: Image size relate to the resolution of image. High quality images the size will be larger. Model can provide better result if image resolution is better but with higher resolution image model can take more time to inference and provide results than low quality images and also use more memory. If users have more memory and also can accept with some delay for more accurate result then higher resoltuion means larger image can be use. We usually need image size same as the image size used to train models to provide good accuracy.
 
 ## Model Research
-
-[This heading is only required if a suitable model was not found after trying out at least three
-different models. However, you may also use this heading to detail how you converted 
-a successful model.]
 
 In investigating potential people counter models, I tried each of the following three models:
 
