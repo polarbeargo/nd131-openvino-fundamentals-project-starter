@@ -24,7 +24,7 @@ python3 main.py --rtsp --uri http://0.0.0.0:3004/fac.ffm  -m models/intel/person
 
 ## Comparing Model Performance
 
-My method to compare [ssd_mobilenet_v2_coco_2018_03_29](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz) before and after conversion to Intermediate Representations is calculate `total_inference_time = inference_end_time - inference_start_time` around execuete the following code: 
+My method to compare [ssd_mobilenet_v2_coco_2018_03_29](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz) before and after conversion to Intermediate Representations is to calculate `total_inference_time = inference_end_time - inference_start_time` around execuete the following code: 
 - pre-conversion
 ```
 inference_start_time = time.time()
@@ -70,18 +70,11 @@ inference time  | 4828.266 ms  | 35.72 ms
 
 Some of the potential use cases of the people counter app are...
 
-1. Automate Carp counting.
-2. Automate road repair spot counting.
-3. Automate mosquitoes vector counting.
-4. Automate rust spot counting.
-5. Automate drop trash with abandon spot counting.
-
-Each of these use cases would be useful because...
-1. Automate Carp counting - Automatically detect and classify simple specie of carp to species suchas sharks,tunas and more which catch by fishing boats will accelerate the video review process. Reliable data and Faster review will enable Taiwan aquaculture to reallocate human capital to management and enforcement activities which can help on conservation and our planet.
-2. Automate road repair spot counting - Automatically detect and classify road repair spot will accelerate the video review process. Reliable data and Faster review will help Ａustralia and Taiwan road repair fleet management. 
-3. Automate mosquitoes vector counting - To help control dengue fever applying transfer learning to train new model with mosquitoes vector images to detect, classify and count mosquitoe vectors as it reach specific count then spray drugs to kill mosquitoe vectors.
-4. Automate rust spot counting - Automatically localize rust location in Taiwan bridge or building to help derusting fleet management.
-5. Automate drop trash with abandon spot counting - For Taiwan public health, automatically detect drop trash with abandon spot will help garbage truck fleet management and provide citizen clean environment.
+1. Audience Statistics - By Detecting and count audience in theater and concert with this app, user only need to process CCTV footage and perform the statistics of population.
+2. Retail - Directing people to less-congested queues in the store. 
+3. Crowd Detection (specifically for current Covid-19) - By check on the number of people in the frame to keep control the acces at common zones such as offices or hospital.  
+4. Security Systems - To restric people going to sensitive area or indivisual property.
+5. Tenant Counting - Help house owner to know the people gathering in or around their house on daily basis with the function duration and total count.
 
 ## Assess Effects on End User Needs
 
