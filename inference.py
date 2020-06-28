@@ -83,11 +83,11 @@ class Network:
         # Return the shape of the input layer ###
         return self.network.inputs[self.input_blob].shape
 
-    def exec_net(self, frame):
+    def exec_net(self, frame,request_id):
         # Start an asynchronous request ###
         # Return any necessary information ###
         ### Note: You may need to update the function parameters. ###
-        return self.exec_network.start_async(request_id=0,
+        return self.exec_network.start_async(request_id=request_id,
                                              inputs={self.input_blob: frame})
     def wait(self):
         # Wait for the request to be complete. ###

@@ -171,8 +171,7 @@ def infer_on_stream(args, client):
     prev_count = 0
     total_count = 0
     duration = 0
-    counter = 0
-    start = None
+    request_id = 0
 
     # Loop until stream is over ###
     while cap.isOpened():
@@ -187,7 +186,6 @@ def infer_on_stream(args, client):
 
         width = int(cap.get(3))
         height = int(cap.get(4))
-        #displayFrame = frame.copy()
 
         # Pre-process the image as needed ###
         #processed_frame = pre_process(frame, net_input_shape)
@@ -197,7 +195,7 @@ def infer_on_stream(args, client):
 
         # Start asynchronous inference for specified request ###
         t0 = time.time()
-        plugin.exec_net(p_frame)
+        plugin.exec_net(p_frame, request_id)
 
         # Wait for the result ###
         if plugin.wait() == 0:
@@ -208,7 +206,6 @@ def infer_on_stream(args, client):
             inference_t = t1 - t0
 
             # Extract any desired stats from the results ###
-            pointer = 0
             displayFrame, cur_count = draw_outputs(frame, result, prob_threshold, width, height)
             inference_t_message = "Inference time: {:.3f}ms"\
                                .format(inference_t)
