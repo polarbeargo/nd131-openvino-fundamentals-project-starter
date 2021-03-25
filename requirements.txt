@@ -19,7 +19,7 @@ numpy==1.18.3
 paho-mqtt==1.5.0
 protobuf==3.11.3
 pyaml==20.4.0
-PyYAML==5.3.1
+PyYAML==5.4
 requests>=2.23.0
 scikit-learn==0.22.2.post1
 scipy==1.4.1
